@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: finance-ledger
+
+  # Database configuration
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/${DB_NAME:finance-ledger_db}
+    username: ${DB_USER:finance-ledger}
+    password: ${DB_PASSWORD:finance-ledger}
+    jpa:
+      hibernate:
+        ddl-auto: update
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/changelog-master.yaml
+
+# Server Configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /finance-ledger
+
+# Management Endpoints
+management:
+  endpoint:
+    refresh:
+      access: read_only
+    metrics:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: refresh,health,metrics

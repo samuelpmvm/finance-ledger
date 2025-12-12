@@ -1,0 +1,10 @@
+spring:
+  profile:
+    active: test
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=POSTGRESQL
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+  liquibase:
+    enabled: false

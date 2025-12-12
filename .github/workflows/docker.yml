@@ -1,0 +1,35 @@
+name: CI - Docker build and Docker Compose Test
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  docker-compose-integration-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: docker build . --file Dockerfile --tag finance-ledger-app:1.0.0
+
+      - name: Run Docker Compose
+        run: |
+          docker compose -f docker-compose.yaml up -d
+
+      - name: Wait for the device-app service to be ready
+        run: |
+          echo "Waiting for device-app service..."
+          until curl --fail http://localhost:8080/finance-ledger/actuator/health; do
+            sleep 5
+          done
+
+      - name: Shut down Docker Compose
+        if: always()
+        run: docker compose down
