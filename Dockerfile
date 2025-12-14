@@ -1,16 +1,15 @@
 # JDK base image
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 LABEL authors="samarcos"
 
 WORKDIR /app
 
 # Copy and build the project
 COPY . .
-
-RUN ./mvnw clean package -DskipTests
+RUN mvn -B -DskipTests clean package
 
 # Final image
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 
