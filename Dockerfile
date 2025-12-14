@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy and build the project
 COPY . .
 
-#RUN ./mvnw clean package -DskipTests
+RUN ./mvnw clean package -DskipTests
 
 # Final image
 FROM eclipse-temurin:21-jre-alpine
