@@ -1,1 +1,10 @@
 databaseChangeLog:
+  - include:
+      file: create/changelog-master.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: delete/changelog-master.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: update/changelog-master.yaml
+      relativeToChangelogFile: true

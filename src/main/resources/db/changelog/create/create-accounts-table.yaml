@@ -1,0 +1,54 @@
+databaseChangeLog:
+  - changeSet:
+      id: accounts
+      author: samarcos
+      changes:
+        - createTable:
+            tableName: accounts
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: varchar(50)
+                  remarks: BANK, SAVINGS, INVESTMENT, CASH, OTHER
+              - column:
+                  name: include_in_budget
+                  type: boolean
+                  defaultValueBoolean: true
+              - column:
+                  name: balance
+                  type: numeric(19,4)
+                  defaultValueNumeric: 0
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+        - addForeignKeyConstraint:
+            baseTableName: accounts
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_accounts_users
+
+        - createIndex:
+            tableName: accounts
+            indexName: idx_accounts_user
+            columns:
+              - column:
+                  name: user_id
