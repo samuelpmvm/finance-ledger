@@ -1,4 +1,4 @@
-package com.fintech.finance_ledger;
+package com.fintech.finance.ledger;
 
 import org.springframework.boot.SpringApplication;
 

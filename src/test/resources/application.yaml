@@ -8,3 +8,8 @@ spring:
     password: password
   liquibase:
     enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          enabled: false
