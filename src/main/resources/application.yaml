@@ -14,12 +14,12 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/changelog-master.yaml
   # Security Configuration
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http:/${KEYCLOAK_HOST:keycloak}:8080/realms/{REALM:finance}
-          jwk-set-uri: http://${KEYCLOAK_HOST:keycloak}:8080/realms/{REALM:finance}/protocol/openid-connect/certs
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          issuer-uri: http:/${KEYCLOAK_HOST:keycloak}:8080/realms/{REALM:finance}
+#          jwk-set-uri: http://${KEYCLOAK_HOST:keycloak}:8080/realms/{REALM:finance}/protocol/openid-connect/certs
 
 # Server Configuration
 server:
