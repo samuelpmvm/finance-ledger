@@ -35,7 +35,6 @@
 		<java.version>21</java.version>
 		<spring-boot.version>4.0.0</spring-boot.version>
 		<postgresql.version>42.7.8</postgresql.version>
-		<h2.version>2.4.240</h2.version>
 		<liquibase.version>5.0.1</liquibase.version>
 		<log4j2.version>2.25.2</log4j2.version>
 		<micrometer.version>1.16.0</micrometer.version>

@@ -1,0 +1,34 @@
+package com.fintech.finance.ledger.userauth.service;
+
+import com.fintech.finance.ledger.BaseIntegrationTest;
+import com.fintech.finance.ledger.userauth.dto.UserEntity;
+import com.fintech.finance.ledger.userauth.repositories.UserRepository;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.jwt.Jwt;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class UserProvisioningServiceIT extends BaseIntegrationTest {
+    @Autowired
+    UserProvisioningService service;
+
+    @Autowired
+    UserRepository repository;
+
+    @Test
+    void shouldProvisionUserOnce() {
+        Jwt jwt = Jwt.withTokenValue("token")
+                .header("alg", "none")
+                .claim("sub", "kc-999")
+                .claim("email", "int@test.com")
+                .claim("preferred_username", "integration")
+                .build();
+
+        UserEntity first = service.provisionUser(jwt);
+        UserEntity second = service.provisionUser(jwt);
+
+        assertEquals(first.getId(), second.getId());
+        assertEquals(1, repository.count());
+    }
+}
