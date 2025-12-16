@@ -28,7 +28,7 @@ services:
       - "8081:8080"
     depends_on:
       - postgres
-  finance-ledger-app:
+  backend-app:
     image: finance-ledger-app:1.0.0
     build:
       context: .
@@ -40,6 +40,9 @@ services:
       DB_HOST: postgres
       DB_USER: finance-ledger
       DB_PASSWORD: finance-ledger
+      KEYCLOAK_HOST: keycloak
+      KEYCLOAK_PORT: 8080
+      REALM: finance
     ports:
       - "8080:8080"
     depends_on:
