@@ -18,8 +18,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http:/${KEYCLOAK_HOST:localhost}:8081/realms/{REALM:finance}
-          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:8081/realms/{REALM:finance}/protocol/openid-connect/certs
+          issuer-uri: http://${KEYCLOAK_HOST:localhost}:8081/realms/${REALM:finance}
 
 # Server Configuration
 server:
