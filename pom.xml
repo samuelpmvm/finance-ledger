@@ -229,6 +229,7 @@
 							</goals>
 							<configuration>
 								<sources>
+                                    <source>${project.build.directory}/generated-sources/errors/src/main/java</source>
 									<source>${project.build.directory}/generated-sources/accounts/src/main/java</source>
 								</sources>
 							</configuration>
@@ -273,7 +274,7 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<inputSpec>${project.basedir}/src/main/resources/accounts.yaml</inputSpec>
+							<inputSpec>${project.basedir}/src/main/resources/openapi/accounts/accounts-api.yaml</inputSpec>
 							<generatorName>spring</generatorName>
 							<output>${project.build.directory}/generated-sources/accounts</output>
 							<apiPackage>com.api.accounts</apiPackage>
@@ -287,9 +288,33 @@
 								<useTags>true</useTags>
 								<serializableModel>true</serializableModel>
 								<useJakartaEe>true</useJakartaEe>
+                                <generate-alias-as-model>false</generate-alias-as-model>
 							</configOptions>
 						</configuration>
 					</execution>
+                    <execution>
+                        <id>generate-errors-schema</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/common/errors.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <output>${project.build.directory}/generated-sources/errors</output>
+                            <apiPackage>com.api.errors</apiPackage>
+                            <modelPackage>com.model.errors</modelPackage>
+                            <configOptions>
+                                <serializationLibrary>jackson</serializationLibrary>
+                                <openApiNullable>false</openApiNullable>
+                                <interfaceOnly>true</interfaceOnly>
+                                <generateSupportingFiles>false</generateSupportingFiles>
+                                <unhandledException>true</unhandledException>
+                                <useTags>true</useTags>
+                                <serializableModel>true</serializableModel>
+                                <useJakartaEe>true</useJakartaEe>
+                            </configOptions>
+                        </configuration>
+                    </execution>
 				</executions>
 			</plugin>
 			<plugin>
@@ -328,10 +353,13 @@
 										</limit>
 									</limits>
 									<excludes>
+                                        <exclude>com.api.errors</exclude>
+                                        <exclude>com.model.errors</exclude>
 										<exclude>com.api.accounts</exclude>
 										<exclude>com.model.accounts</exclude>
 										<exclude>com.fintech.finance.ledger</exclude>
 										<exclude>com.fintech.finance.ledger.userauth.security.config</exclude>
+                                        <exclude>com.fintech.finance.ledger.common.exception</exclude>
 									</excludes>
 								</rule>
 							</rules>

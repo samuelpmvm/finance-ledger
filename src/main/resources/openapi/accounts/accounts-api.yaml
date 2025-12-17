@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-  title: DevOps Checklist
-  description: A checklist for DevOps practices and tools.
+  title: Accounts
+  description: An API to manage user accounts
   version: 1.0.0
 
 paths:
@@ -34,3 +34,12 @@ paths:
           description: Account created successfully
         '400':
           description: Invalid input
+components:
+  schemas:
+    AccountNotFoundError:
+      allOf:
+        - $ref: '../common/errors.yaml#/components/schemas/ApiError'
+        - type: object
+          properties:
+            accountId:
+              type: string
