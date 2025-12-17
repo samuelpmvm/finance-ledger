@@ -1,0 +1,36 @@
+openapi: 3.0.3
+info:
+  title: DevOps Checklist
+  description: A checklist for DevOps practices and tools.
+  version: 1.0.0
+
+paths:
+  /accounts:
+    get:
+      summary: Retrieve a list of accounts
+      responses:
+        '200':
+          description: A JSON array of account names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+    post:
+      summary: Create a new account
+      requestBody:
+        description: Account object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          description: Account created successfully
+        '400':
+          description: Invalid input

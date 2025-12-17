@@ -1,11 +1,15 @@
 package com.fintech.finance.ledger.userauth.dto;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
 @Entity
 @Table(name = "users")
+@Getter @Setter @NoArgsConstructor
 public class UserEntity {
 
     @Id
@@ -20,27 +24,9 @@ public class UserEntity {
 
     private String name;
 
-    protected UserEntity() {}
-
     public UserEntity(String providerId, String email, String name) {
         this.providerId = providerId;
         this.email = email;
         this.name = name;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getProviderId() {
-        return providerId;
-    }
-
-    public String getName() {
-        return name;
     }
 }

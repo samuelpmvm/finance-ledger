@@ -13,7 +13,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./init-keycloakDB.sql:/docker-entrypoint-initdb.d/init-keycloakDB.sql
   keycloak:
     image: quay.io/keycloak/keycloak:26.4.7
     command: start-dev

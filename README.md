@@ -2,9 +2,9 @@
 
 [![Last Commit](https://img.shields.io/github/last-commit/samuelpmvm/finance-ledger)](https://github.com/samuelpmvm/finance-ledger)
 
-[![Java CI with Maven](https://github.com/samuelpmvm/finance-ledger/actions/workflows/maven.yml/badge.svg)](https://github.com/samuelpmvm/device-manager/actions/workflows/maven.yml)
+[![Java CI with Maven](https://github.com/samuelpmvm/finance-ledger/actions/workflows/maven.yml/badge.svg)](https://github.com/samuelpmvm/finance-ledger/actions/workflows/maven.yml)
 
-[![CI - Docker build and Docker Compose Test](https://github.com/samuelpmvm/finance-ledger/actions/workflows/docker.yml/badge.svg)](https://github.com/samuelpmvm/device-manager/actions/workflows/docker.yml)
+[![CI - Docker build and Docker Compose Test](https://github.com/samuelpmvm/finance-ledger/actions/workflows/docker.yml/badge.svg)](https://github.com/samuelpmvm/finance-ledger/actions/workflows/docker.yml)
 
 [![License](https://img.shields.io/github/license/samuelpmvm/finance-ledger)](LICENSE)
 
@@ -58,4 +58,4 @@ Each module owns its domain logic and database tables.
 
 ```bash
 docker compose up
-
+```
