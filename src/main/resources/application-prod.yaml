@@ -1,8 +1,6 @@
 spring:
   application:
     name: finance-ledger
-  profiles:
-    default: dev
 
   # Database configuration
   datasource:
@@ -20,7 +18,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8081}/realms/${REALM:finance}/protocol/openid-connect/certs
+            issuer-uri: ${ISSUER_URI:http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8081}/realms/${REALM:finance}}
 # Server Configuration
 server:
   port: 8080
