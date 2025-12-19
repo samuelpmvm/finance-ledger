@@ -358,7 +358,7 @@
 										<exclude>com.api.accounts</exclude>
 										<exclude>com.model.accounts</exclude>
 										<exclude>com.fintech.finance.ledger</exclude>
-										<exclude>com.fintech.finance.ledger.userauth.security.config</exclude>
+										<exclude>com.fintech.finance.ledger.userauth.config</exclude>
                                         <exclude>com.fintech.finance.ledger.common.exception</exclude>
 									</excludes>
 								</rule>

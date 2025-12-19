@@ -1,12 +1,14 @@
-package com.fintech.finance.ledger.userauth.service;
+package com.fintech.finance.ledger.service;
 
-import com.fintech.finance.ledger.userauth.dto.UserEntity;
-import com.fintech.finance.ledger.userauth.repositories.UserRepository;
+import com.fintech.finance.ledger.entity.User;
+import com.fintech.finance.ledger.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -20,17 +22,18 @@ public class UserProvisioningService {
         this.userRepository = userRepository;
     }
 
-    public UserEntity provisionUser(Jwt jwt) {
+    public User provisionUser(Jwt jwt) {
         var providerId = jwt.getSubject();
-        return userRepository.findByProviderId(providerId)
+        return userRepository.findByAuthProviderId(providerId)
                 .orElseGet(() -> createUserFromJwt(jwt));
     }
 
-    private UserEntity createUserFromJwt(Jwt jwt) {
+    private User createUserFromJwt(Jwt jwt) {
         LOGGER.info("Provisioning new user with provider ID: {}", jwt.getSubject());
         var providerId = jwt.getSubject();
-        var email = jwt.getClaimAsString(EMAIL);
+        var tenantId = UUID.randomUUID();
         var name = jwt.getClaimAsString(PREFERRED_USERNAME);
-        return userRepository.save(new UserEntity(providerId, email, name));
+        var email = jwt.getClaimAsString(EMAIL);
+        return userRepository.save(new User(providerId, tenantId, name, email));
     }
 }

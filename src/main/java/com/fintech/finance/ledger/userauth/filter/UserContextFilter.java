@@ -1,8 +1,9 @@
-package com.fintech.finance.ledger.userauth.security.filter;
+package com.fintech.finance.ledger.userauth.filter;
 
-import com.fintech.finance.ledger.common.tenant.TenantContext;
-import com.fintech.finance.ledger.userauth.dto.UserEntity;
-import com.fintech.finance.ledger.userauth.service.UserProvisioningService;
+import com.fintech.finance.ledger.common.tenant.UserContext;
+import com.fintech.finance.ledger.common.tenant.UserContextData;
+import com.fintech.finance.ledger.entity.User;
+import com.fintech.finance.ledger.service.UserProvisioningService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,14 +33,15 @@ public class UserContextFilter extends OncePerRequestFilter {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
-            UserEntity user = provisioningService.provisionUser(jwt);
-            TenantContext.setUserId(user.getId());
+            User user = provisioningService.provisionUser(jwt);
+            var userContextData = new UserContextData(user.getId(), user.getTenantId(), user.getAuthProviderId());
+            UserContext.setUserContextData(userContextData);
         }
 
         try {
             filterChain.doFilter(request, response);
         } finally {
-            TenantContext.clear();
+            UserContext.clear();
         }
     }
 }

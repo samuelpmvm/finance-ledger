@@ -1,8 +1,8 @@
-package com.fintech.finance.ledger.userauth.controller;
+package com.fintech.finance.ledger.controller;
 
-import com.fintech.finance.ledger.common.tenant.TenantContext;
-import com.fintech.finance.ledger.userauth.dto.UserEntity;
-import com.fintech.finance.ledger.userauth.repositories.UserRepository;
+import com.fintech.finance.ledger.common.tenant.UserContext;
+import com.fintech.finance.ledger.entity.User;
+import com.fintech.finance.ledger.repository.UserRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,8 +20,8 @@ public class MeController {
     }
 
     @GetMapping("/me")
-    public UserEntity getMe() {
-        UUID userId = TenantContext.getUserId();
+    public User getMe() {
+        UUID userId = UserContext.getUserContextData().userId();
         return userRepository.findById(userId).orElseThrow();
     }
 }

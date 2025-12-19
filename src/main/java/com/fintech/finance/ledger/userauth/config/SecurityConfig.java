@@ -1,7 +1,7 @@
-package com.fintech.finance.ledger.userauth.security.config;
+package com.fintech.finance.ledger.userauth.config;
 
 
-import com.fintech.finance.ledger.userauth.security.filter.UserContextFilter;
+import com.fintech.finance.ledger.userauth.filter.UserContextFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;

@@ -1,8 +1,10 @@
-package com.fintech.finance.ledger.userauth.controller;
+package com.fintech.finance.ledger.controller;
 
-import com.fintech.finance.ledger.common.tenant.TenantContext;
-import com.fintech.finance.ledger.userauth.dto.UserEntity;
-import com.fintech.finance.ledger.userauth.repositories.UserRepository;
+import com.fintech.finance.ledger.common.tenant.UserContext;
+import com.fintech.finance.ledger.common.tenant.UserContextData;
+import com.fintech.finance.ledger.controller.MeController;
+import com.fintech.finance.ledger.entity.User;
+import com.fintech.finance.ledger.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -26,7 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class MeControllerTest {
 
-    private static final String PROVIDER_ID = "provider-123";
+    private static final String AUTHPROVIDER_ID = "provider-id";
+    private static final UUID TENANT_ID = UUID.randomUUID();
     private static final String EMAIL = "test@example.com";
     private static final String TESTUSER = "testuser";
     @Autowired
@@ -37,26 +40,26 @@ class MeControllerTest {
 
     @AfterEach
     void tearDown() {
-        TenantContext.clear();
+        UserContext.clear();
     }
 
     @Test
     @WithMockUser
     void testGetMe_ReturnsUserSuccessfully() throws Exception {
         UUID userId = UUID.randomUUID();
-        UserEntity userEntity = new UserEntity(PROVIDER_ID, EMAIL, TESTUSER);
-        userEntity.setId(userId);
+        User user = new User(AUTHPROVIDER_ID, TENANT_ID, TESTUSER, EMAIL);
+        user.setId(userId);
 
-        TenantContext.setUserId(userId);
+        UserContext.setUserContextData(new UserContextData( user.getId(), user.getTenantId(), user.getAuthProviderId()));
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         mockMvc.perform(get("/api/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId.toString()))
                 .andExpect(jsonPath("$.email").value(EMAIL))
                 .andExpect(jsonPath("$.name").value(TESTUSER))
-                .andExpect(jsonPath("$.providerId").value(PROVIDER_ID));
+                .andExpect(jsonPath("$.authProviderId").value(AUTHPROVIDER_ID));
     }
 
     @Test

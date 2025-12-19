@@ -1,11 +1,12 @@
-package com.fintech.finance.ledger.userauth.repositories;
+package com.fintech.finance.ledger.repository;
 
 import com.fintech.finance.ledger.BaseIntegrationTest;
-import com.fintech.finance.ledger.userauth.dto.UserEntity;
+import com.fintech.finance.ledger.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,17 +16,18 @@ class UserRepositoryIT extends BaseIntegrationTest {
     UserRepository repository;
 
     @Test
-    void shouldSaveAndFindByProviderId() {
-        UserEntity user = new UserEntity(
+    void shouldSaveAndFindByAuthProviderId() {
+        User user = new User(
                 "kc-123",
-                "test@test.com",
-                "test"
+                UUID.randomUUID(),
+                "test",
+                "test@test.com"
         );
 
         repository.save(user);
 
-        Optional<UserEntity> found =
-                repository.findByProviderId("kc-123");
+        Optional<User> found =
+                repository.findByAuthProviderId("kc-123");
 
         assertTrue(found.isPresent());
     }

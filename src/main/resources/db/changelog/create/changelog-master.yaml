@@ -5,3 +5,9 @@ databaseChangeLog:
   - include:
       file: create-accounts-table.yaml
       relativeToChangelogFile: true
+  - include:
+      file: create-categories-table.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: create-transactions-table.yaml
+      relativeToChangelogFile: true

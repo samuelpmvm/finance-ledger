@@ -1,8 +1,8 @@
-package com.fintech.finance.ledger.userauth.security.filter;
+package com.fintech.finance.ledger.userauth.filter;
 
-import com.fintech.finance.ledger.common.tenant.TenantContext;
-import com.fintech.finance.ledger.userauth.dto.UserEntity;
-import com.fintech.finance.ledger.userauth.service.UserProvisioningService;
+import com.fintech.finance.ledger.common.tenant.UserContext;
+import com.fintech.finance.ledger.entity.User;
+import com.fintech.finance.ledger.service.UserProvisioningService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,7 +34,8 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("test")
 class UserContextFilterTest {
 
-    private static final String PROVIDER_ID = "provider-id";
+    private static final String AUTHPROVIDER_ID = "provider-id";
+    private static final UUID TENANT_ID = UUID.randomUUID();
     private static final String EMAIL = "test@example.com";
     private static final String TESTUSER = "testuser";
 
@@ -61,7 +62,7 @@ class UserContextFilterTest {
 
     @AfterEach
     void tearDown() {
-        TenantContext.clear();
+        UserContext.clear();
         SecurityContextHolder.clearContext();
     }
 
@@ -74,19 +75,19 @@ class UserContextFilterTest {
     void testDoFilterInternalWithValidJwtAuthentication() throws Exception {
         UUID userId = UUID.randomUUID();
         Jwt jwt = createMockJwt();
-        UserEntity userEntity = new UserEntity(PROVIDER_ID, EMAIL, TESTUSER);
-        userEntity.setId(userId);
+        User user = new User(AUTHPROVIDER_ID, TENANT_ID, TESTUSER, EMAIL);
+        user.setId(userId);
 
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(jwt);
-        when(provisioningService.provisionUser(jwt)).thenReturn(userEntity);
+        when(provisioningService.provisionUser(jwt)).thenReturn(user);
 
         userContextFilter.doFilterInternal(request, response, filterChain);
 
         verify(provisioningService, times(1)).provisionUser(jwt);
         verify(filterChain, times(1)).doFilter(request, response);
 
-        assertNull(TenantContext.getUserId());
+        assertNull(UserContext.getUserContextData());
     }
 
     @Test
@@ -97,7 +98,7 @@ class UserContextFilterTest {
 
         verify(provisioningService, never()).provisionUser(any());
         verify(filterChain, times(1)).doFilter(request, response);
-        assertNull(TenantContext.getUserId());
+        assertNull(UserContext.getUserContextData());
     }
 
     @Test
@@ -109,39 +110,39 @@ class UserContextFilterTest {
 
         verify(provisioningService, never()).provisionUser(any());
         verify(filterChain, times(1)).doFilter(request, response);
-        assertNull(TenantContext.getUserId());
+        assertNull(UserContext.getUserContextData());
     }
 
     @Test
     void testDoFilterInternalClearsTenantContextEvenOnException() throws ServletException, IOException {
         UUID userId = UUID.randomUUID();
         Jwt jwt = createMockJwt();
-        UserEntity userEntity = new UserEntity(PROVIDER_ID, EMAIL, TESTUSER);
-        userEntity.setId(userId);
+        User user = new User(AUTHPROVIDER_ID, TENANT_ID, TESTUSER, EMAIL);
+        user.setId(userId);
 
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(jwt);
-        when(provisioningService.provisionUser(jwt)).thenReturn(userEntity);
+        when(provisioningService.provisionUser(jwt)).thenReturn(user);
         doThrow(new ServletException("Test exception")).when(filterChain).doFilter(request, response);
 
         assertThrows(ServletException.class, () -> userContextFilter.doFilterInternal(request, response, filterChain));
 
-        assertNull(TenantContext.getUserId());
+        assertNull(UserContext.getUserContextData());
     }
 
     @Test
     void testDoFilterInternalSetsUserIdInTenantContext() throws ServletException, IOException {
         UUID userId = UUID.randomUUID();
         Jwt jwt = createMockJwt();
-        UserEntity userEntity = new UserEntity(PROVIDER_ID, EMAIL, TESTUSER);
-        userEntity.setId(userId);
+        User user = new User(AUTHPROVIDER_ID, TENANT_ID, TESTUSER, EMAIL);
+        user.setId(userId);
 
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(jwt);
-        when(provisioningService.provisionUser(jwt)).thenReturn(userEntity);
+        when(provisioningService.provisionUser(jwt)).thenReturn(user);
 
         doAnswer(invocation -> {
-            assertEquals(userId, TenantContext.getUserId());return null;})
+            assertEquals(userId, UserContext.getUserContextData().userId());return null;})
                 .when(filterChain)
                 .doFilter(request, response);
 

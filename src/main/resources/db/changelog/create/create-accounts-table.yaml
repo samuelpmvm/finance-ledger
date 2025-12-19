@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: accounts
+      id: create-accounts
       author: samarcos
       changes:
         - createTable:
