@@ -10,7 +10,10 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "categories",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"tenant_id", "name"}
+        ))
 @Getter @Setter @NoArgsConstructor
 public class Category {
 
@@ -18,12 +21,13 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false)
+    private UUID tenantId;
+
+    @Column(nullable = false)
     private String name;
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
     private Category parent;
-
-    @OneToMany(mappedBy = "parent")
-    private Set<Category> subcategories = new HashSet<>();
 }

@@ -360,6 +360,8 @@
 										<exclude>com.fintech.finance.ledger</exclude>
 										<exclude>com.fintech.finance.ledger.userauth.config</exclude>
                                         <exclude>com.fintech.finance.ledger.common.exception</exclude>
+                                        <exclude>com.fintech.finance.ledger.entity</exclude>
+                                        <exclude>com.fintech.finance.ledger.repository</exclude>
 									</excludes>
 								</rule>
 							</rules>

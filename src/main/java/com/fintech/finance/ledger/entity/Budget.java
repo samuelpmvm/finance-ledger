@@ -10,7 +10,10 @@ import java.time.YearMonth;
 import java.util.UUID;
 
 @Entity
-@Table(name = "budgets")
+@Table(name = "budgets",
+        indexes = {
+                @Index(name = "idx_tx_tenant", columnList = "tenant_id"),
+        })
 @Getter @Setter @NoArgsConstructor
 public class Budget {
 
@@ -18,11 +21,15 @@ public class Budget {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false)
+    private UUID tenantId;
+
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private BigDecimal limitAmount;
+
+    @Column(nullable = false)
     private YearMonth month; // Multi-month support
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
 }

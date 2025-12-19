@@ -13,7 +13,7 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: user_id
+                  name: tenant_id
                   type: uuid
                   constraints:
                     nullable: false
@@ -25,30 +25,21 @@ databaseChangeLog:
               - column:
                   name: type
                   type: varchar(50)
-                  remarks: BANK, SAVINGS, INVESTMENT, CASH, OTHER
+                  constraints:
+                    nullable: true
               - column:
                   name: include_in_budget
                   type: boolean
-                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
               - column:
                   name: balance
-                  type: numeric(19,4)
-                  defaultValueNumeric: 0
-              - column:
-                  name: created_at
-                  type: timestamp with time zone
-                  defaultValueComputed: CURRENT_TIMESTAMP
-
-        - addForeignKeyConstraint:
-            baseTableName: accounts
-            baseColumnNames: user_id
-            referencedTableName: users
-            referencedColumnNames: id
-            constraintName: fk_accounts_users
-
+                  type: numeric(19, 2)
+                  constraints:
+                    nullable: false
         - createIndex:
+            indexName: idx_account_tenant
             tableName: accounts
-            indexName: idx_accounts_user
             columns:
               - column:
-                  name: user_id
+                  name: tenant_id

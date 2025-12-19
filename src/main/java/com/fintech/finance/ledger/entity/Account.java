@@ -11,7 +11,8 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "accounts")
+@Table(name = "accounts",
+        indexes = @Index(name = "idx_account_tenant", columnList = "tenant_id"))
 @Getter @Setter @NoArgsConstructor
 public class Account {
 
@@ -19,17 +20,18 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false)
+    private UUID tenantId;
+
+    @Column(nullable = false)
     private String name;
+
     private String type; // e.g., BANK, CASH, INVESTMENT, SAVINGS
+
+    @Column(nullable = false)
     private boolean includeInBudget;
 
+    @Column(nullable = false)
     private BigDecimal balance;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @OneToMany(mappedBy = "account")
-    private Set<Transaction> transactions = new HashSet<>();
 }
 

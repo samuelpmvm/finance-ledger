@@ -8,47 +8,60 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: UUID
+                  type: uuid
                   constraints:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: amount
-                  type: DECIMAL(19,4)
+                  name: tenant_id
+                  type: uuid
                   constraints:
                     nullable: false
-              - column:
-                  name: date
-                  type: DATE
-                  constraints:
-                    nullable: false
-              - column:
-                  name: description
-                  type: VARCHAR(255)
               - column:
                   name: account_id
-                  type: UUID
+                  type: uuid
                   constraints:
                     nullable: false
               - column:
                   name: category_id
-                  type: UUID
+                  type: uuid
+                  constraints:
+                    nullable: true
+              - column:
+                  name: amount
+                  type: numeric(19, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tx_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(500)
+                  constraints:
+                    nullable: true
               - column:
                   name: imported
-                  type: BOOLEAN
-                  defaultValueBoolean: false
+                  type: boolean
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_tx_tenant
+            tableName: transactions
+            columns:
               - column:
                   name: tenant_id
-                  type: VARCHAR(50)
-        - addForeignKeyConstraint:
-            baseTableName: transactions
-            baseColumnNames: account_id
-            referencedTableName: accounts
-            referencedColumnNames: id
-            constraintName: fk_transactions_account
-        - addForeignKeyConstraint:
-            baseTableName: transactions
-            baseColumnNames: category_id
-            referencedTableName: categories
-            referencedColumnNames: id
-            constraintName: fk_transactions_category
+        - createIndex:
+            indexName: idx_tx_account
+            tableName: transactions
+            columns:
+              - column:
+                  name: account_id
+        - createIndex:
+            indexName: idx_tx_category
+            tableName: transactions
+            columns:
+              - column:
+                  name: category_id

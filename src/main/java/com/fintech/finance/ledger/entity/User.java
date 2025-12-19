@@ -29,9 +29,6 @@ public class User {
     @Column(nullable = false)
     private String email;
 
-    @OneToMany(mappedBy = "user")
-    private Set<Account> accounts = new HashSet<>();
-
     public User(String authProviderId, UUID tenantId, String name, String email) {
         this.authProviderId = authProviderId;
         this.tenantId = tenantId;

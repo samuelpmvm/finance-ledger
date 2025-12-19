@@ -3,6 +3,9 @@ databaseChangeLog:
       file: create-users-table.yaml
       relativeToChangelogFile: true
   - include:
+      file: create-tenant-table.yaml
+      relativeToChangelogFile: true
+  - include:
       file: create-accounts-table.yaml
       relativeToChangelogFile: true
   - include:
