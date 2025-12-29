@@ -45,6 +45,7 @@
 		<openapi-generator.version>7.17.0</openapi-generator.version>
 		<helper-maven-plugin.version>3.6.1</helper-maven-plugin.version>
 		<jackson.version>3.0.3</jackson.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -150,6 +151,17 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${mapstruct.version}</version>
+            <scope>provided</scope>
+        </dependency>
 		<!-- Tests dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -247,7 +259,13 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
 						</path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
@@ -357,6 +375,7 @@
                                         <exclude>com.model.errors</exclude>
 										<exclude>com.api.accounts</exclude>
 										<exclude>com.model.accounts</exclude>
+                                        <exclude>org.openapitools.configuration</exclude>
 										<exclude>com.fintech.finance.ledger</exclude>
 										<exclude>com.fintech.finance.ledger.userauth.config</exclude>
                                         <exclude>com.fintech.finance.ledger.common.exception</exclude>

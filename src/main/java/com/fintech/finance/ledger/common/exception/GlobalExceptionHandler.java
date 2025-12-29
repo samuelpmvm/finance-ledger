@@ -1,6 +1,7 @@
 package com.fintech.finance.ledger.common.exception;
 
 
+import com.model.accounts.AccountNotFoundError;
 import com.model.errors.ApiError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiError(HttpStatus.NOT_FOUND.value(),
                         "Resource not found. For more details check the documentation",
+                        exception.getMessage()));
+    }
+
+    @ExceptionHandler(AccountNotFoundException.class)
+    public ResponseEntity<AccountNotFoundError> handleAccountNotFoundException(NoResourceFoundException exception) {
+        LOGGER.error("No account resource found exception found: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new AccountNotFoundError(HttpStatus.NOT_FOUND.value(),
+                        ApiErrorMessage.ACCOUNT_NOT_FOUND.getError(),
                         exception.getMessage()));
     }
 }

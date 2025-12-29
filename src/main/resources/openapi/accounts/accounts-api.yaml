@@ -12,30 +12,91 @@ paths:
         '200':
           description: A JSON array of account names
           content:
-            application/json:
+            application/account-response-json:
               schema:
                 type: array
                 items:
                   type: string
+        '404':
+          description: Account not found
+          content:
+            application/account-error-json:
+              schema:
+                $ref: '#/components/schemas/AccountNotFoundError'
     post:
+      tags:
+        - AccountController
       summary: Create a new account
+      description: Endpoint to create a new account in the system.
+        Accepts a `AccountDto` object in the request body and returns the created account.
+      operationId: createAccount
       requestBody:
-        description: Account object that needs to be added
         required: true
         content:
-          application/json:
+          application/account-request-json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
+              $ref: '#/components/schemas/AccountDto'
       responses:
         '201':
           description: Account created successfully
+          content:
+            application/account-response-json:
+              schema:
+                $ref: '#/components/schemas/AccountDto'
         '400':
-          description: Invalid input
+          description: Bad request, invalid input data
+          content:
+            application/account-error-json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+        '500':
+          description: Internal server error
+          content:
+            application/account-error-json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
 components:
   schemas:
+    AccountType:
+      description: |
+        Type of Account.
+        - `cash`
+        - `investment`
+        - `savings`
+        - `other`
+      example: bank
+      enum:
+        - bank
+        - cash
+        - investment
+        - savings
+        - other
+    AccountDto:
+      type: object
+      description: Represents a request to create/update an account.
+      example:
+        name: "Account Name"
+        balance: "0.0"
+        type: bank
+        includeInBudget: true
+      required:
+        - name
+        - balance
+        - type
+        - includeInBudget
+      properties:
+        name:
+          type: string
+          description: Name of the account
+        balance:
+          type: string
+          format: bigdecimal
+          description: Balance of the account
+        type:
+          $ref: '#/components/schemas/AccountType'
+        includeInBudget:
+          type: boolean
+          description: Mention if account is in the budget or not
     AccountNotFoundError:
       allOf:
         - $ref: '../common/errors.yaml#/components/schemas/ApiError'
