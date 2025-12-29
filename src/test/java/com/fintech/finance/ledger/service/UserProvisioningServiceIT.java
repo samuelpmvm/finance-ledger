@@ -10,15 +10,15 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UserProvisioningServiceIT extends BaseIntegrationTest {
+class UserProvisioningServiceIT extends BaseIntegrationTest {
     @Autowired
-    UserProvisioningService service;
+    private UserProvisioningService service;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    TenantRepository tenantRepository;
+    private TenantRepository tenantRepository;
 
     @Test
     void shouldProvisionUserOnce() {

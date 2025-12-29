@@ -85,12 +85,16 @@ components:
         - type
         - includeInBudget
       properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the account
         name:
           type: string
           description: Name of the account
         balance:
-          type: string
-          format: bigdecimal
+          type: number
+          format: double
           description: Balance of the account
         type:
           $ref: '#/components/schemas/AccountType'

@@ -57,6 +57,6 @@ public class UserProvisioningService {
 
     private String buildTenantName(Jwt jwt) {
         return Optional.ofNullable(jwt.getClaimAsString("name"))
-                .orElse(jwt.getClaimAsString("preferred_username")) + " Workspace";
+                .orElse(jwt.getClaimAsString(PREFERRED_USERNAME)) + " Workspace";
     }
 }

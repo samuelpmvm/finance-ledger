@@ -2,7 +2,6 @@ package com.fintech.finance.ledger.controller;
 
 import com.fintech.finance.ledger.common.tenant.UserContext;
 import com.fintech.finance.ledger.common.tenant.UserContextData;
-import com.fintech.finance.ledger.controller.MeController;
 import com.fintech.finance.ledger.entity.User;
 import com.fintech.finance.ledger.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;

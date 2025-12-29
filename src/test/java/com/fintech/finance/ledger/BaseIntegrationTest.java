@@ -27,5 +27,4 @@ public class BaseIntegrationTest {
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.datasource.driver-class-name", postgres::getDriverClassName);
     }
-
 }

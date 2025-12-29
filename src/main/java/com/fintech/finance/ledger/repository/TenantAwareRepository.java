@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface TenantAwareRepository<T, ID>
         extends JpaRepository<T, ID> {
 
-    default UUID tenantId() {;
+    default UUID tenantId() {
         return UserContext.getUserContextData().tenantId();
     }
 }

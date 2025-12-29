@@ -75,7 +75,6 @@ class UserProvisioningServiceTest {
         var userEntity = new User(PROVIDER, TENANT_ID, PREFERRED_USERNAME, EMAIL);
         Mockito.when(userRepository.findByAuthProviderId(PROVIDER)).thenReturn(Optional.of(userEntity));
         userProvisioningService.provisionUser(jwt);
-        ArgumentCaptor<User> userEntityArgumentCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.verify(userRepository, Mockito.never()).save(ArgumentMatchers.any(User.class));
         Mockito.verify(tenantRepository, Mockito.never()).save(ArgumentMatchers.any(Tenant.class));
 

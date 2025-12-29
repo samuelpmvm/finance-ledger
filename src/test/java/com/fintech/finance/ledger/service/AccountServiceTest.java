@@ -8,7 +8,6 @@ import com.fintech.finance.ledger.mapper.AccountMapper;
 import com.fintech.finance.ledger.repository.AccountRepository;
 import com.model.accounts.AccountDto;
 import com.model.accounts.AccountType;
-import org.apache.tomcat.util.http.parser.TE;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -25,14 +24,15 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 @Tag("unit")
 class AccountServiceTest {
 
     private static final String ACCOUNT_NAME = "account";
-    private static final BigDecimal BALANCE = BigDecimal.valueOf(0.0);
+    private static final Double BALANCE = 0.0;
     private static final AccountType ACCOUNT_TYPE = AccountType.BANK;
     private static final boolean INCLUDE_IN_BUDGET = true;
     private static final UUID TEST_TENANT_ID =
@@ -63,13 +63,13 @@ class AccountServiceTest {
 
     @Test
     void createAccountSuccess() {
-        var accountDto = new AccountDto(ACCOUNT_NAME, BALANCE.toString(), ACCOUNT_TYPE, INCLUDE_IN_BUDGET);
+        var accountDto = new AccountDto(ACCOUNT_NAME, BALANCE, ACCOUNT_TYPE, INCLUDE_IN_BUDGET);
         ArgumentCaptor<Account> accountEntityArgumentCaptor = ArgumentCaptor.forClass(Account.class);
         accountService.createAccount(accountDto);
         Mockito.verify(accountRepository, Mockito.times(1)).save(accountEntityArgumentCaptor.capture());
         var account = accountEntityArgumentCaptor.getValue();
         assertEquals(ACCOUNT_NAME, account.getName());
-        assertEquals(BALANCE, account.getBalance());
+        assertEquals(BigDecimal.valueOf(BALANCE), account.getBalance());
         assertEquals(ACCOUNT_TYPE.getValue().toUpperCase(), account.getType());
     }
 
@@ -79,12 +79,12 @@ class AccountServiceTest {
         var account = new Account();
         account.setName(ACCOUNT_NAME);
         account.setType(ACCOUNT_TYPE.toString().toUpperCase());
-        account.setBalance(BALANCE);
+        account.setBalance(BigDecimal.valueOf(BALANCE));
         account.setIncludeInBudget(INCLUDE_IN_BUDGET);
         Mockito.when(accountRepository.findByIdAndTenantId(accountId, TEST_TENANT_ID)).thenReturn(Optional.of(account));
         var accountDto = accountService.findAccountById(accountId);
         assertEquals(ACCOUNT_NAME, accountDto.getName());
-        assertEquals(BALANCE.toString(), accountDto.getBalance());
+        assertEquals(BALANCE, accountDto.getBalance());
         assertEquals(ACCOUNT_TYPE, accountDto.getType());
     }
 
