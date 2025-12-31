@@ -7,22 +7,39 @@ info:
 paths:
   /accounts:
     get:
+      tags:
+        - AccountController
+      operationId: getAllAccounts
       summary: Retrieve a list of accounts
+      description: Endpoint to retrieve a list of all accounts for the current tenant.
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number for pagination (default is 0)
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          description: Number of accounts per page (default is 10)
+          schema:
+            type: integer
+            default: 10
       responses:
         '200':
           description: A JSON array of account names
           content:
-            application/account-response-json:
+            application/account-response+json:
               schema:
-                type: array
-                items:
-                  type: string
-        '404':
-          description: Account not found
+                $ref: '#/components/schemas/AccountPage'
+        '500':
+          description: Internal server error
           content:
-            application/account-error-json:
+            application/account-error+json:
               schema:
-                $ref: '#/components/schemas/AccountNotFoundError'
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
     post:
       tags:
         - AccountController
@@ -33,26 +50,142 @@ paths:
       requestBody:
         required: true
         content:
-          application/account-request-json:
+          application/account-request+json:
             schema:
               $ref: '#/components/schemas/AccountDto'
       responses:
         '201':
           description: Account created successfully
           content:
-            application/account-response-json:
+            application/account-response+json:
               schema:
                 $ref: '#/components/schemas/AccountDto'
         '400':
           description: Bad request, invalid input data
           content:
-            application/account-error-json:
+            application/account-error+json:
               schema:
                 $ref: '../common/errors.yaml#/components/schemas/ApiError'
         '500':
           description: Internal server error
           content:
-            application/account-error-json:
+            application/account-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+    put:
+        tags:
+            - AccountController
+        summary: Update an existing account
+        description: Endpoint to update an existing account in the system.
+            Accepts a `AccountDto` object in the request body and returns the updated account.
+        operationId: updateAccount
+        requestBody:
+            required: true
+            content:
+              application/account-request+json:
+                schema:
+                  $ref: '#/components/schemas/AccountDto'
+        responses:
+          '200':
+            description: Account updated successfully
+            content:
+              application/account-response+json:
+                schema:
+                  $ref: '#/components/schemas/AccountDto'
+          '400':
+            description: Bad request, invalid input data
+            content:
+              application/account-error+json:
+                schema:
+                  $ref: '../common/errors.yaml#/components/schemas/ApiError'
+          '404':
+            description: Account not found
+            content:
+              application/account-error+json:
+                schema:
+                  $ref: '#/components/schemas/AccountNotFoundError'
+          '500':
+            description: Internal server error
+            content:
+              application/account-error+json:
+                schema:
+                  $ref: '../common/errors.yaml#/components/schemas/ApiError'
+    delete:
+      tags:
+        - AccountController
+      summary: Delete all accounts
+      description: Endpoint to delete all accounts for the current tenant.
+      operationId: deleteAllAccounts
+      responses:
+        '204':
+          description: All accounts deleted successfully
+        '500':
+          description: Internal server error
+          content:
+            application/account-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+  /accounts/{accountId}:
+    delete:
+      tags:
+        - AccountController
+      summary: Delete an account by ID
+      description: Endpoint to delete a specific account by its ID for the current tenant.
+      operationId: deleteAccountById
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: The ID of the account to delete
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Account deleted successfully
+        '404':
+          description: Account not found
+          content:
+            application/account-error+json:
+              schema:
+                $ref: '#/components/schemas/AccountNotFoundError'
+        '500':
+          description: Internal server error
+          content:
+            application/account-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+    get:
+      tags:
+        - AccountController
+      summary: Retrieve an account by ID
+      description: Endpoint to retrieve a specific account by its ID for the current tenant.
+      operationId: getAccountById
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: The ID of the account to retrieve
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Account retrieved successfully
+          content:
+            application/account-response+json:
+              schema:
+                $ref: '#/components/schemas/AccountDto'
+        '404':
+          description: Account not found
+          content:
+            application/account-error+json:
+              schema:
+                $ref: '#/components/schemas/AccountNotFoundError'
+        '500':
+          description: Internal server error
+          content:
+            application/account-error+json:
               schema:
                 $ref: '../common/errors.yaml#/components/schemas/ApiError'
 components:
@@ -101,6 +234,24 @@ components:
         includeInBudget:
           type: boolean
           description: Mention if account is in the budget or not
+    AccountPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        last:
+          type: boolean
     AccountNotFoundError:
       allOf:
         - $ref: '../common/errors.yaml#/components/schemas/ApiError'

@@ -4,13 +4,14 @@ import com.fintech.finance.ledger.common.exception.AccountNotFoundException;
 import com.fintech.finance.ledger.common.exception.ApiErrorMessage;
 import com.fintech.finance.ledger.common.tenant.UserContext;
 import com.fintech.finance.ledger.mapper.AccountMapper;
+import com.fintech.finance.ledger.mapper.PageDtoMapper;
 import com.fintech.finance.ledger.repository.AccountRepository;
 import com.model.accounts.AccountDto;
+import com.model.accounts.AccountPage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -40,11 +41,11 @@ public class AccountService {
         return accountMapper.toDto(account);
     }
 
-    public Page<AccountDto> getAllAccounts(Pageable pageable) {
+    public AccountPage getAllAccounts(Pageable pageable) {
         var tenantId = UserContext.getUserContextData().tenantId();
         LOGGER.info("Fetching all accounts for tenant ID: {}", tenantId);
         var accountPage = accountRepository.findAllByTenantId(tenantId, pageable);
-        return accountPage.map(accountMapper::toDto);
+        return PageDtoMapper.toAccountPage(accountPage.map(accountMapper::toDto));
     }
 
     public void deleteAllAccounts() {
@@ -62,7 +63,7 @@ public class AccountService {
         }
     }
 
-    public void updateAccount(AccountDto accountDto) {
+    public AccountDto updateAccount(AccountDto accountDto) {
         var tenantId = UserContext.getUserContextData().tenantId();
         var accountId = accountDto.getId();
         LOGGER.info("Updating account with ID: {} for tenant ID: {}", accountId, tenantId);
@@ -71,7 +72,7 @@ public class AccountService {
         var updatedAccount = accountMapper.toEntity(accountDto);
         updatedAccount.setTenantId(tenantId);
         updatedAccount.setId(existingAccount.getId());
-        accountRepository.save(updatedAccount);
+        return accountMapper.toDto(accountRepository.save(updatedAccount));
     }
 
 }

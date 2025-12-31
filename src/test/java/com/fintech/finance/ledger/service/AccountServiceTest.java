@@ -87,9 +87,11 @@ class AccountServiceTest {
         Mockito.verify(accountRepository, Mockito.times(1)).findAllByTenantId(ArgumentMatchers.eq(UserContext.getUserContextData().tenantId()), ArgumentMatchers.any());
         assertEquals(1, accountPage.getTotalElements());
         assertEquals(1, accountPage.getTotalPages());
-        assertEquals(ACCOUNT_NAME, accountPage.get().findFirst().get().getName());
-        assertEquals(BALANCE, accountPage.get().findFirst().get().getBalance());
-        assertEquals(ACCOUNT_TYPE, accountPage.get().findFirst().get().getType());
+
+        var accountDto = accountPage.getContent().get(0);
+        assertEquals(ACCOUNT_NAME, accountDto.getName());
+        assertEquals(BALANCE, accountDto.getBalance());
+        assertEquals(ACCOUNT_TYPE, accountDto.getType());
     }
 
     @Test

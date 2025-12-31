@@ -11,4 +11,3 @@ public interface AccountMapper {
 
     Account toEntity(AccountDto dto);
 }
-
