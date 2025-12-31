@@ -7,8 +7,8 @@ import org.springframework.data.repository.NoRepositoryBean;
 import java.util.UUID;
 
 @NoRepositoryBean
-public interface TenantAwareRepository<T, ID>
-        extends JpaRepository<T, ID> {
+public interface TenantAwareRepository<T, I>
+        extends JpaRepository<T, I> {
 
     default UUID tenantId() {
         return UserContext.getUserContextData().tenantId();

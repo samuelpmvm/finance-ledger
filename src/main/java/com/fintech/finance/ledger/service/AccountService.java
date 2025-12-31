@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -30,12 +32,46 @@ public class AccountService {
         return accountMapper.toDto(accountRepository.save(account));
     }
 
-    public AccountDto findAccountById (UUID accountId) {
+    public AccountDto getAccountById(UUID accountId) {
         var tenantId = UserContext.getUserContextData().tenantId();
         LOGGER.info("Fetch Account with ID: {}", accountId);
         var account = accountRepository.findByIdAndTenantId(accountId, tenantId)
                 .orElseThrow(() -> new AccountNotFoundException(ApiErrorMessage.ACCOUNT_NOT_FOUND.getErrorMessage(accountId)));
         return accountMapper.toDto(account);
+    }
+
+    public Page<AccountDto> getAllAccounts(Pageable pageable) {
+        var tenantId = UserContext.getUserContextData().tenantId();
+        LOGGER.info("Fetching all accounts for tenant ID: {}", tenantId);
+        var accountPage = accountRepository.findAllByTenantId(tenantId, pageable);
+        return accountPage.map(accountMapper::toDto);
+    }
+
+    public void deleteAllAccounts() {
+        var tenantId = UserContext.getUserContextData().tenantId();
+        LOGGER.info("Deleting all accounts for tenant ID: {}", tenantId);
+        accountRepository.deleteAllByTenantId(tenantId);
+    }
+
+    public void deleteAccountById(UUID accountId) {
+        var tenantId = UserContext.getUserContextData().tenantId();
+        LOGGER.info("Deleting account with ID: {} for tenant ID: {}", accountId, tenantId);
+        int deletedCount = accountRepository.deleteByIdAndTenantId(accountId, tenantId);
+        if (deletedCount == 0) {
+            throw new AccountNotFoundException(ApiErrorMessage.ACCOUNT_NOT_FOUND.getErrorMessage(accountId));
+        }
+    }
+
+    public void updateAccount(AccountDto accountDto) {
+        var tenantId = UserContext.getUserContextData().tenantId();
+        var accountId = accountDto.getId();
+        LOGGER.info("Updating account with ID: {} for tenant ID: {}", accountId, tenantId);
+        var existingAccount = accountRepository.findByIdAndTenantId(accountId, tenantId)
+                .orElseThrow(() -> new AccountNotFoundException(ApiErrorMessage.ACCOUNT_NOT_FOUND.getErrorMessage(accountId)));
+        var updatedAccount = accountMapper.toEntity(accountDto);
+        updatedAccount.setTenantId(tenantId);
+        updatedAccount.setId(existingAccount.getId());
+        accountRepository.save(updatedAccount);
     }
 
 }
