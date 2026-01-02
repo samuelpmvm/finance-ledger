@@ -206,7 +206,7 @@ components:
         - other
     AccountDto:
       type: object
-      description: Represents a request to create/update an account.
+      description: Represents a user account.
       example:
         name: "Account Name"
         balance: "0.0"
@@ -234,6 +234,10 @@ components:
         includeInBudget:
           type: boolean
           description: Mention if account is in the budget or not
+        tenantId:
+          type: string
+          format: uuid
+          description: Identifier for the tenant owning the account
     AccountPage:
       type: object
       properties:

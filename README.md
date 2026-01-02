@@ -46,7 +46,6 @@ The application follows a **modular monolith** approach with **multi-tenant** su
 
 ```
 src/main/java/com/fintech/finance/ledger/
-├── accounts/          # Financial accounts module (future)
 ├── common/            # Shared utilities
 │   ├── exception/     # Global exception handling
 │   └── tenant/        # Multi-tenant context management
@@ -71,15 +70,33 @@ src/main/java/com/fintech/finance/ledger/
 
 ## 📚 API Endpoints
 
+### Accounts
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/finance-ledger/api/me` | Get current authenticated user |
-| `GET` | `/finance-ledger/api/accounts` | List all accounts (paginated) |
-| `POST` | `/finance-ledger/api/accounts` | Create a new account |
-| `GET` | `/finance-ledger/api/accounts/{id}` | Get account by ID |
-| `PUT` | `/finance-ledger/api/accounts/{id}` | Update an account |
-| `DELETE` | `/finance-ledger/api/accounts/{id}` | Delete an account |
-| `DELETE` | `/finance-ledger/api/accounts` | Delete all accounts |
+| `GET` | `/finance-ledger/api/v1/accounts` | List all accounts (paginated) |
+| `POST` | `/finance-ledger/api/v1/accounts` | Create a new account |
+| `GET` | `/finance-ledger/api/v1/accounts/{id}` | Get account by ID |
+| `PUT` | `/finance-ledger/api/v1/accounts` | Update an account |
+| `DELETE` | `/finance-ledger/api/v1/accounts/{id}` | Delete an account |
+| `DELETE` | `/finance-ledger/api/v1/accounts` | Delete all accounts |
+
+### Categories
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/finance-ledger/api/v1/categories` | List all categories (paginated) |
+| `POST` | `/finance-ledger/api/v1/categories` | Create a new category |
+| `GET` | `/finance-ledger/api/v1/categories/{id}` | Get category by ID |
+| `PUT` | `/finance-ledger/api/v1/categories` | Update a category |
+| `DELETE` | `/finance-ledger/api/v1/categories/{id}` | Delete a category |
+| `DELETE` | `/finance-ledger/api/v1/categories` | Delete all categories |
+
+### User
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/finance-ledger/api/v1/me` | Get current authenticated user |
 
 ### Account Types
 

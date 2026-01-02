@@ -5,7 +5,8 @@ import lombok.Getter;
 import java.text.MessageFormat;
 
 public enum ApiErrorMessage {
-    ACCOUNT_NOT_FOUND("Account not found. Check documentation for more details.", "Account not found with Id {0}");
+    ACCOUNT_NOT_FOUND("Account not found. Check documentation for more details.", "Account not found with Id {0}"),
+    CATEGORY_NOT_FOUND("Category not found. Check documentation for more details.", "Category not found with Id {0}");
 
     @Getter
     private final String error;

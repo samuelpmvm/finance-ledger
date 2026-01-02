@@ -2,6 +2,7 @@ package com.fintech.finance.ledger.common.exception;
 
 
 import com.model.accounts.AccountNotFoundError;
+import com.model.category.CategoryNotFoundError;
 import com.model.errors.ApiError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +72,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new AccountNotFoundError(HttpStatus.NOT_FOUND.value(),
                         ApiErrorMessage.ACCOUNT_NOT_FOUND.getError(),
+                        exception.getMessage()));
+    }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<CategoryNotFoundError> handleCategoryNotFoundException(CategoryNotFoundException exception) {
+        LOGGER.error("No category resource found exception found: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new CategoryNotFoundError(HttpStatus.NOT_FOUND.value(),
+                        ApiErrorMessage.CATEGORY_NOT_FOUND.getError(),
                         exception.getMessage()));
     }
 }

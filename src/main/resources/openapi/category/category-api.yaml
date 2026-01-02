@@ -1,0 +1,242 @@
+openapi: 3.0.3
+info:
+  title: Categories
+  description: An API to manage user categories
+  version: 1.0.0
+
+paths:
+  /categories:
+    get:
+      tags:
+        - CategoryController
+      operationId: getAllCategories
+      summary: Retrieve a list of categories
+      description: Endpoint to retrieve a list of all categories for the current tenant.
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number for pagination (default is 0)
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          description: Number of categories per page (default is 10)
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: A JSON array of category names
+          content:
+            application/category-response+json:
+              schema:
+                $ref: '#/components/schemas/CategoryPage'
+        '500':
+          description: Internal server error
+          content:
+            application/category-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+    post:
+      tags:
+        - CategoryController
+      summary: Create a new category
+      description: Endpoint to create a new category in the system.
+        Accepts a `CategoryDto` object in the request body and returns the created category.
+      operationId: createCategory
+      requestBody:
+        required: true
+        content:
+          application/category-request+json:
+            schema:
+              $ref: '#/components/schemas/CategoryDto'
+      responses:
+        '201':
+          description: Category created successfully
+          content:
+            application/category-response+json:
+              schema:
+                $ref: '#/components/schemas/CategoryDto'
+        '400':
+          description: Bad request, invalid input data
+          content:
+            application/category-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+        '500':
+          description: Internal server error
+          content:
+            application/category-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+    put:
+      tags:
+        - CategoryController
+      summary: Update an existing category
+      description: Endpoint to update an existing category in the system.
+        Accepts a `CategoryDto` object in the request body and returns the updated category.
+      operationId: updateCategory
+      requestBody:
+        required: true
+        content:
+          application/category-request+json:
+            schema:
+              $ref: '#/components/schemas/CategoryDto'
+      responses:
+        '200':
+          description: Category updated successfully
+          content:
+            application/category-response+json:
+              schema:
+                $ref: '#/components/schemas/CategoryDto'
+        '400':
+          description: Bad request, invalid input data
+          content:
+            application/category-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+        '404':
+          description: Category not found
+          content:
+            application/category-error+json:
+              schema:
+                $ref: '#/components/schemas/CategoryNotFoundError'
+        '500':
+          description: Internal server error
+          content:
+            application/category-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+    delete:
+      tags:
+        - CategoryController
+      summary: Delete all categories
+      description: Endpoint to delete all categories for the current tenant.
+      operationId: deleteAllCategories
+      responses:
+        '204':
+          description: All categories deleted successfully
+        '500':
+          description: Internal server error
+          content:
+            application/category-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+  /categories/{categoryId}:
+    delete:
+      tags:
+        - CategoryController
+      summary: Delete a category by ID
+      description: Endpoint to delete a specific category by its ID for the current tenant.
+      operationId: deleteCategoryById
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: The ID of the category to delete
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Category deleted successfully
+        '404':
+          description: Category not found
+          content:
+            application/category-error+json:
+              schema:
+                $ref: '#/components/schemas/CategoryNotFoundError'
+        '500':
+          description: Internal server error
+          content:
+            application/category-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+    get:
+      tags:
+        - CategoryController
+      summary: Retrieve a category by ID
+      description: Endpoint to retrieve a specific category by its ID for the current tenant.
+      operationId: getCategoryById
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: The ID of the category to retrieve
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Category retrieved successfully
+          content:
+            application/category-response+json:
+              schema:
+                $ref: '#/components/schemas/CategoryDto'
+        '404':
+          description: Category not found
+          content:
+            application/category-error+json:
+              schema:
+                $ref: '#/components/schemas/CategoryNotFoundError'
+        '500':
+          description: Internal server error
+          content:
+            application/category-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+
+components:
+  schemas:
+    CategoryDto:
+      type: object
+      description: Represents a user category.
+      example:
+        name: "Food & Dining"
+        parentId: null
+      required:
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the category
+        name:
+          type: string
+          description: Name of the category
+        parentId:
+          type: string
+          format: uuid
+          description: ID of the parent category (null if top-level category)
+        tenantId:
+          type: string
+          format: uuid
+          description: ID of the tenant owning the category
+    CategoryPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        last:
+          type: boolean
+    CategoryNotFoundError:
+      allOf:
+        - $ref: '../common/errors.yaml#/components/schemas/ApiError'
+        - type: object
+          properties:
+            categoryId:
+              type: string
