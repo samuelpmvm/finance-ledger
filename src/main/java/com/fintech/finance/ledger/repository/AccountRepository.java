@@ -6,11 +6,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface AccountRepository extends TenantAwareRepository<Account, UUID> {
 
+    @Override
     Page<Account> findAllByTenantId(UUID tenantId, Pageable pageable);
 
     Optional<Account> findByIdAndTenantId(UUID accountId, UUID tenantId);
@@ -22,4 +24,6 @@ public interface AccountRepository extends TenantAwareRepository<Account, UUID> 
     @Modifying
     @Transactional
     int deleteByIdAndTenantId(UUID accountId,UUID tenantId);
+
+    List<Account> getAllByTenantId(UUID tenantId);
 }

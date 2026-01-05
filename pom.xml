@@ -244,6 +244,7 @@
                                     <source>${project.build.directory}/generated-sources/errors/src/main/java</source>
 									<source>${project.build.directory}/generated-sources/accounts/src/main/java</source>
 									<source>${project.build.directory}/generated-sources/category/src/main/java</source>
+									<source>${project.build.directory}/generated-sources/transaction/src/main/java</source>
 								</sources>
 							</configuration>
 						</execution>
@@ -358,6 +359,30 @@
                             </configOptions>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-transaction-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/transaction/transaction-api.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <output>${project.build.directory}/generated-sources/transaction</output>
+                            <apiPackage>com.api.transaction</apiPackage>
+                            <modelPackage>com.model.transaction</modelPackage>
+                            <configOptions>
+                                <serializationLibrary>jackson</serializationLibrary>
+                                <openApiNullable>false</openApiNullable>
+                                <interfaceOnly>true</interfaceOnly>
+                                <generateSupportingFiles>false</generateSupportingFiles>
+                                <unhandledException>true</unhandledException>
+                                <useTags>true</useTags>
+                                <serializableModel>true</serializableModel>
+                                <useJakartaEe>true</useJakartaEe>
+                                <generate-alias-as-model>false</generate-alias-as-model>
+                            </configOptions>
+                        </configuration>
+                    </execution>
 				</executions>
 			</plugin>
 			<plugin>
@@ -402,6 +427,8 @@
 										<exclude>com.model.accounts</exclude>
 										<exclude>com.api.category</exclude>
 										<exclude>com.model.category</exclude>
+										<exclude>com.api.transaction</exclude>
+										<exclude>com.model.transaction</exclude>
                                         <exclude>org.openapitools.configuration</exclude>
 										<exclude>com.fintech.finance.ledger</exclude>
 										<exclude>com.fintech.finance.ledger.userauth.config</exclude>

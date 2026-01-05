@@ -4,6 +4,7 @@ package com.fintech.finance.ledger.common.exception;
 import com.model.accounts.AccountNotFoundError;
 import com.model.category.CategoryNotFoundError;
 import com.model.errors.ApiError;
+import com.model.transaction.TransactionNotFoundError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -81,6 +82,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new CategoryNotFoundError(HttpStatus.NOT_FOUND.value(),
                         ApiErrorMessage.CATEGORY_NOT_FOUND.getError(),
+                        exception.getMessage()));
+    }
+
+    @ExceptionHandler(TransactionNotFoundException.class)
+    public ResponseEntity<TransactionNotFoundError> handleTransactionNotFoundException(TransactionNotFoundException exception) {
+        LOGGER.error("No transaction resource found exception found: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new TransactionNotFoundError(HttpStatus.NOT_FOUND.value(),
+                        ApiErrorMessage.TRANSACTION_NOT_FOUND.getError(),
+                        exception.getMessage()));
+    }
+
+    @ExceptionHandler(AccountDeletionNotAllowedException.class)
+    public ResponseEntity<TransactionNotFoundError> handleAccountDeletionNotAllowedException(AccountDeletionNotAllowedException exception) {
+        LOGGER.error("Account deletion not allowed exception found: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.IM_USED)
+                .body(new TransactionNotFoundError(HttpStatus.IM_USED.value(),
+                        ApiErrorMessage.ACCOUNT_CAN_NOT_BE_DELETED.getError(),
                         exception.getMessage()));
     }
 }

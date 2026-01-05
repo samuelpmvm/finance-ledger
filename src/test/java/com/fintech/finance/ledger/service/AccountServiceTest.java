@@ -1,8 +1,10 @@
 package com.fintech.finance.ledger.service;
 
 import com.fintech.finance.ledger.TenantTestExtension;
+import com.fintech.finance.ledger.common.exception.AccountDeletionNotAllowedException;
 import com.fintech.finance.ledger.common.exception.AccountNotFoundException;
 import com.fintech.finance.ledger.common.tenant.UserContext;
+import com.fintech.finance.ledger.common.validator.AccountDeletionPolicy;
 import com.fintech.finance.ledger.entity.Account;
 import com.fintech.finance.ledger.mapper.AccountMapper;
 import com.fintech.finance.ledger.repository.AccountRepository;
@@ -26,6 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith({MockitoExtension.class, TenantTestExtension.class})
 @Tag("unit")
@@ -42,11 +45,14 @@ class AccountServiceTest {
     @Mock
     private AccountRepository accountRepository;
 
+    @Mock
+    private AccountDeletionPolicy accountDeletionPolicy;
+
     private final AccountMapper accountMapper = Mappers.getMapper(AccountMapper.class);
 
     @BeforeEach
     void setup() {
-        accountService = new AccountService(accountRepository, accountMapper);
+        accountService = new AccountService(accountRepository, accountMapper, accountDeletionPolicy);
     }
 
     @Test
@@ -112,8 +118,48 @@ class AccountServiceTest {
 
     @Test
     void testDeleteAllAccounts() {
+        Mockito.when(accountRepository.getAllByTenantId(UserContext.getUserContextData().tenantId())).thenReturn(List.of());
         accountService.deleteAllAccounts();
         Mockito.verify(accountRepository, Mockito.times(1)).deleteAllByTenantId(UserContext.getUserContextData().tenantId());
+    }
+
+    @Test
+    void testDeleteAccountByIdFailsWhenAccountHasTransactions() {
+        var accountId = UUID.randomUUID();
+        var tenantId = UserContext.getUserContextData().tenantId();
+        doThrow(new AccountDeletionNotAllowedException("Account with ID: " + accountId + " cannot be deleted as it has associated transactions."))
+                .when(accountDeletionPolicy).validateAccountDeletion(tenantId, accountId);
+
+        var exception = assertThrows(AccountDeletionNotAllowedException.class,
+                () -> accountService.deleteAccountById(accountId));
+
+        assertTrue(exception.getMessage().contains("cannot be deleted as it has associated transactions"));
+        Mockito.verify(accountDeletionPolicy, Mockito.times(1)).validateAccountDeletion(tenantId, accountId);
+        Mockito.verify(accountRepository, Mockito.never()).deleteByIdAndTenantId(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    void testDeleteAllAccountsFailsWhenAnyAccountHasTransactions() {
+        var tenantId = UserContext.getUserContextData().tenantId();
+        var account1 = getAccount();
+        var account1Id = UUID.randomUUID();
+        account1.setId(account1Id);
+        var account2 = getAccount();
+        var account2Id = UUID.randomUUID();
+        account2.setId(account2Id);
+
+        Mockito.when(accountRepository.getAllByTenantId(tenantId)).thenReturn(List.of(account1, account2));
+        Mockito.doNothing().when(accountDeletionPolicy).validateAccountDeletion(tenantId, account1Id);
+        doThrow(new AccountDeletionNotAllowedException("Account with ID: " + account2Id + " cannot be deleted as it has associated transactions."))
+                .when(accountDeletionPolicy).validateAccountDeletion(tenantId, account2Id);
+
+        var exception = assertThrows(AccountDeletionNotAllowedException.class,
+                () -> accountService.deleteAllAccounts());
+
+        assertTrue(exception.getMessage().contains("cannot be deleted as it has associated transactions"));
+        Mockito.verify(accountDeletionPolicy, Mockito.times(1)).validateAccountDeletion(tenantId, account1Id);
+        Mockito.verify(accountDeletionPolicy, Mockito.times(1)).validateAccountDeletion(tenantId, account2Id);
+        Mockito.verify(accountRepository, Mockito.never()).deleteAllByTenantId(tenantId);
     }
 
     @Test

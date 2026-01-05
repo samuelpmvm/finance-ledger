@@ -25,7 +25,6 @@ public class Category {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "parent_id")
-    private Category parent;
+    @Column(name = "parent_id", nullable = false)
+    private UUID parentId;
 }

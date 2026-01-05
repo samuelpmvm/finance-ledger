@@ -1,0 +1,266 @@
+openapi: 3.0.3
+info:
+  title: Transactions
+  description: An API to manage user transactions
+  version: 1.0.0
+
+paths:
+  /transactions:
+    get:
+      tags:
+        - TransactionController
+      operationId: getAllTransactions
+      summary: Retrieve a list of transactions
+      description: Endpoint to retrieve a list of all transactions for the current tenant.
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number for pagination (default is 0)
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          description: Number of transactions per page (default is 10)
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: A JSON array of transactions
+          content:
+            application/transaction-response+json:
+              schema:
+                $ref: '#/components/schemas/TransactionPage'
+        '500':
+          description: Internal server error
+          content:
+            application/transaction-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+    post:
+      tags:
+        - TransactionController
+      summary: Create a new transaction
+      description: Endpoint to create a new transaction in the system.
+        Accepts a `TransactionDto` object in the request body and returns the created transaction.
+      operationId: createTransaction
+      requestBody:
+        required: true
+        content:
+          application/transaction-request+json:
+            schema:
+              $ref: '#/components/schemas/TransactionDto'
+      responses:
+        '201':
+          description: Transaction created successfully
+          content:
+            application/transaction-response+json:
+              schema:
+                $ref: '#/components/schemas/TransactionDto'
+        '400':
+          description: Bad request, invalid input data
+          content:
+            application/transaction-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+        '500':
+          description: Internal server error
+          content:
+            application/transaction-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+    put:
+      tags:
+        - TransactionController
+      summary: Update an existing transaction
+      description: Endpoint to update an existing transaction in the system.
+        Accepts a `TransactionDto` object in the request body and returns the updated transaction.
+      operationId: updateTransaction
+      requestBody:
+        required: true
+        content:
+          application/transaction-request+json:
+            schema:
+              $ref: '#/components/schemas/TransactionDto'
+      responses:
+        '200':
+          description: Transaction updated successfully
+          content:
+            application/transaction-response+json:
+              schema:
+                $ref: '#/components/schemas/TransactionDto'
+        '400':
+          description: Bad request, invalid input data
+          content:
+            application/transaction-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+        '404':
+          description: Transaction not found
+          content:
+            application/transaction-error+json:
+              schema:
+                $ref: '#/components/schemas/TransactionNotFoundError'
+        '500':
+          description: Internal server error
+          content:
+            application/transaction-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+    delete:
+      tags:
+        - TransactionController
+      summary: Delete all transactions
+      description: Endpoint to delete all transactions for the current tenant.
+      operationId: deleteAllTransactions
+      responses:
+        '204':
+          description: All transactions deleted successfully
+        '500':
+          description: Internal server error
+          content:
+            application/transaction-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+  /transactions/{transactionId}:
+    delete:
+      tags:
+        - TransactionController
+      summary: Delete a transaction by ID
+      description: Endpoint to delete a specific transaction by its ID for the current tenant.
+      operationId: deleteTransactionById
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          description: The ID of the transaction to delete
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Transaction deleted successfully
+        '404':
+          description: Transaction not found
+          content:
+            application/transaction-error+json:
+              schema:
+                $ref: '#/components/schemas/TransactionNotFoundError'
+        '500':
+          description: Internal server error
+          content:
+            application/transaction-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+    get:
+      tags:
+        - TransactionController
+      summary: Retrieve a transaction by ID
+      description: Endpoint to retrieve a specific transaction by its ID for the current tenant.
+      operationId: getTransactionById
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          description: The ID of the transaction to retrieve
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Transaction retrieved successfully
+          content:
+            application/transaction-response+json:
+              schema:
+                $ref: '#/components/schemas/TransactionDto'
+        '404':
+          description: Transaction not found
+          content:
+            application/transaction-error+json:
+              schema:
+                $ref: '#/components/schemas/TransactionNotFoundError'
+        '500':
+          description: Internal server error
+          content:
+            application/transaction-error+json:
+              schema:
+                $ref: '../common/errors.yaml#/components/schemas/ApiError'
+
+components:
+  schemas:
+    TransactionDto:
+      type: object
+      description: Represents a financial transaction.
+      example:
+        accountId: "550e8400-e29b-41d4-a716-446655440000"
+        amount: 150.50
+        date: "2026-01-05"
+        description: "Grocery shopping"
+        categoryId: "550e8400-e29b-41d4-a716-446655440001"
+        imported: false
+      required:
+        - accountId
+        - amount
+        - date
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the transaction
+        accountId:
+          type: string
+          format: uuid
+          description: ID of the account associated with the transaction
+        amount:
+          type: number
+          format: double
+          description: Transaction amount (positive for income, negative for expense)
+        date:
+          type: string
+          format: date
+          description: Date of the transaction
+        description:
+          type: string
+          maxLength: 500
+          description: Description of the transaction
+        categoryId:
+          type: string
+          format: uuid
+          description: ID of the category for this transaction
+        imported:
+          type: boolean
+          default: false
+          description: Whether this transaction was imported from an external source
+        tenantId:
+          type: string
+          format: uuid
+          description: ID of the tenant owning the transaction
+    TransactionPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        last:
+          type: boolean
+    TransactionNotFoundError:
+      allOf:
+        - $ref: '../common/errors.yaml#/components/schemas/ApiError'
+        - type: object
+          properties:
+            transactionId:
+              type: string
+

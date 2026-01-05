@@ -11,6 +11,7 @@ import java.util.UUID;
 
 public interface CategoryRepository extends TenantAwareRepository<Category, UUID> {
 
+    @Override
     Page<Category> findAllByTenantId(UUID tenantId, Pageable pageable);
 
     Optional<Category> findByIdAndTenantId(UUID categoryId, UUID tenantId);

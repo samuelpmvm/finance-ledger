@@ -37,6 +37,11 @@ databaseChangeLog:
                   type: numeric(19, 2)
                   constraints:
                     nullable: false
+                  defaultValueNumeric: "0.0"
+              - column:
+                  name: archived
+                  type: boolean
+                  defaultValueBoolean: false
         - createIndex:
             indexName: idx_account_tenant
             tableName: accounts

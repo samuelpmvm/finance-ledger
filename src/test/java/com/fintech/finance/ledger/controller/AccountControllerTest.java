@@ -5,9 +5,11 @@ import com.fintech.finance.ledger.BaseIntegrationTest;
 import com.fintech.finance.ledger.common.tenant.UserContext;
 import com.fintech.finance.ledger.common.tenant.UserContextData;
 import com.fintech.finance.ledger.entity.Tenant;
+import com.fintech.finance.ledger.entity.Transaction;
 import com.fintech.finance.ledger.entity.User;
 import com.fintech.finance.ledger.repository.AccountRepository;
 import com.fintech.finance.ledger.repository.TenantRepository;
+import com.fintech.finance.ledger.repository.TransactionRepository;
 import com.fintech.finance.ledger.repository.UserRepository;
 import com.model.accounts.AccountDto;
 import com.model.accounts.AccountType;
@@ -19,6 +21,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -51,6 +55,9 @@ class AccountControllerTest extends BaseIntegrationTest {
     private TenantRepository tenantRepository;
 
     @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     private UUID tenantId;
@@ -72,6 +79,7 @@ class AccountControllerTest extends BaseIntegrationTest {
 
     @AfterEach
     void cleanup() {
+        transactionRepository.deleteAllByTenantId(tenantId);
         accountRepository.deleteAllByTenantId(tenantId);
         userRepository.deleteById(userId);
         tenantRepository.deleteById(tenantId);
@@ -211,6 +219,46 @@ class AccountControllerTest extends BaseIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void shouldNotDeleteAccountWithTransactions() throws Exception {
+        UUID accountId = createTestAccount(TEST_ACCOUNT_1, BALANCE_1);
+        createTestTransaction(accountId);
+
+        mockMvc.perform(delete(API_V1_ACCOUNTS + "/{accountId}", accountId)
+                        .with(jwt().jwt(jwt -> {
+                            jwt.subject(AUTH_PROVIDER_ID);
+                            jwt.claim("email", TEST_EMAIL);
+                        })))
+                .andExpect(status().isImUsed())
+                .andExpect(jsonPath("$.message").value("Account with ID: " + accountId + " cannot be deleted as it has associated transactions."));
+    }
+
+    @Test
+    void shouldNotDeleteAllAccountsWhenAnyHasTransactions() throws Exception {
+        UUID accountId1 = createTestAccount(TEST_ACCOUNT_1, BALANCE_1);
+        createTestAccount(TEST_ACCOUNT_2, BALANCE_2);
+        createTestTransaction(accountId1);
+
+        mockMvc.perform(delete(API_V1_ACCOUNTS)
+                        .with(jwt().jwt(jwt -> {
+                            jwt.subject(AUTH_PROVIDER_ID);
+                            jwt.claim("email", TEST_EMAIL);
+                        })))
+                .andExpect(status().isImUsed())
+                .andExpect(jsonPath("$.message").value("Account with ID: " + accountId1 + " cannot be deleted as it has associated transactions."));
+
+        mockMvc.perform(get(API_V1_ACCOUNTS)
+                        .with(jwt().jwt(jwt -> {
+                            jwt.subject(AUTH_PROVIDER_ID);
+                            jwt.claim("email", TEST_EMAIL);
+                        }))
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.totalElements").value(2));
+    }
+
     private static AccountDto createAccountDto(String name, double balance) {
         AccountDto accountDto = new AccountDto();
         accountDto.setName(name);
@@ -236,6 +284,16 @@ class AccountControllerTest extends BaseIntegrationTest {
                 .getContentAsString();
 
         return objectMapper.readValue(response, AccountDto.class).getId();
+    }
+
+    private void createTestTransaction(UUID accountId) {
+        Transaction transaction = new Transaction();
+        transaction.setTenantId(tenantId);
+        transaction.setAccountId(accountId);
+        transaction.setAmount(BigDecimal.valueOf(100.0));
+        transaction.setDate(LocalDate.now());
+        transaction.setDescription("Test Transaction");
+        transactionRepository.save(transaction);
     }
 }
 

@@ -31,5 +31,7 @@ public class Account {
 
     @Column(nullable = false)
     private BigDecimal balance;
+
+    private boolean archived;
 }
 

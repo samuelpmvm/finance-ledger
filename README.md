@@ -92,6 +92,17 @@ src/main/java/com/fintech/finance/ledger/
 | `DELETE` | `/finance-ledger/api/v1/categories/{id}` | Delete a category |
 | `DELETE` | `/finance-ledger/api/v1/categories` | Delete all categories |
 
+### Transactions
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/finance-ledger/api/v1/transactions` | List all transactions (paginated) |
+| `POST` | `/finance-ledger/api/v1/transactions` | Create a new transaction |
+| `GET` | `/finance-ledger/api/v1/transactions/{id}` | Get transaction by ID |
+| `PUT` | `/finance-ledger/api/v1/transactions` | Update a transaction |
+| `DELETE` | `/finance-ledger/api/v1/transactions/{id}` | Delete a transaction |
+| `DELETE` | `/finance-ledger/api/v1/transactions` | Delete all transactions |
+
 ### User
 
 | Method | Endpoint | Description |

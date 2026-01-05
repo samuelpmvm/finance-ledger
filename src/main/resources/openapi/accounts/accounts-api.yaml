@@ -188,6 +188,45 @@ paths:
             application/account-error+json:
               schema:
                 $ref: '../common/errors.yaml#/components/schemas/ApiError'
+    patch:
+        tags:
+            - AccountController
+        summary: Archive or unarchive an account by ID
+        description: Endpoint to archive or unarchive a specific account by its ID for the current tenant.
+        operationId: archiveUnarchiveAccountById
+        parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: The ID of the account to archive or unarchive
+          schema:
+            type: string
+            format: uuid
+        - name: archive
+          in: query
+          required: true
+          description: Boolean flag to indicate whether to archive (true) or unarchive (false) the account
+          schema:
+            type: boolean
+        responses:
+          '200':
+            description: Account archived/unarchived successfully
+            content:
+              application/account-response+json:
+                schema:
+                  $ref: '#/components/schemas/AccountDto'
+          '404':
+            description: Account not found
+            content:
+              application/account-error+json:
+                schema:
+                  $ref: '#/components/schemas/AccountNotFoundError'
+          '500':
+            description: Internal server error
+            content:
+              application/account-error+json:
+                schema:
+                  $ref: '../common/errors.yaml#/components/schemas/ApiError'
 components:
   schemas:
     AccountType:
@@ -234,6 +273,10 @@ components:
         includeInBudget:
           type: boolean
           description: Mention if account is in the budget or not
+        archived:
+          type: boolean
+          description: Indicates if the account is archived
+          default: false
         tenantId:
           type: string
           format: uuid

@@ -32,6 +32,13 @@ public class CategoryService {
         return PageDtoMapper.toCategoryPage(categoryPage.map(categoryMapper::toDto));
     }
 
+    public CategoryPage getChildCategories(UUID parentId, Pageable pageable) {
+        var tenantId = UserContext.getUserContextData().tenantId();
+        LOGGER.info("Fetching child categories for parent ID: {} and tenant ID: {}", parentId, tenantId);
+        var categoryPage = categoryRepository.findAllByParentIdAndTenantId(parentId, tenantId, pageable);
+        return PageDtoMapper.toCategoryPage(categoryPage.map(categoryMapper::toDto));
+    }
+
     public CategoryDto createCategory (CategoryDto categoryDto) {
         var category = categoryMapper.toEntity(categoryDto);
         category.setTenantId(UserContext.getUserContextData().tenantId());

@@ -3,6 +3,7 @@ package com.fintech.finance.ledger.service;
 import com.fintech.finance.ledger.common.exception.AccountNotFoundException;
 import com.fintech.finance.ledger.common.exception.ApiErrorMessage;
 import com.fintech.finance.ledger.common.tenant.UserContext;
+import com.fintech.finance.ledger.common.validator.AccountDeletionPolicy;
 import com.fintech.finance.ledger.mapper.AccountMapper;
 import com.fintech.finance.ledger.mapper.PageDtoMapper;
 import com.fintech.finance.ledger.repository.AccountRepository;
@@ -22,9 +23,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AccountService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccountService.class);
     private final AccountRepository accountRepository;
     private final AccountMapper accountMapper;
-    private static final Logger LOGGER = LoggerFactory.getLogger(AccountService.class);
+    private final AccountDeletionPolicy accountDeletionPolicy;
 
     public AccountDto createAccount (AccountDto accountDto) {
         var account = accountMapper.toEntity(accountDto);
@@ -50,12 +52,17 @@ public class AccountService {
 
     public void deleteAllAccounts() {
         var tenantId = UserContext.getUserContextData().tenantId();
+        var accounts = accountRepository.getAllByTenantId(tenantId);
+        for (var account : accounts) {
+            accountDeletionPolicy.validateAccountDeletion(tenantId, account.getId());
+        }
         LOGGER.info("Deleting all accounts for tenant ID: {}", tenantId);
         accountRepository.deleteAllByTenantId(tenantId);
     }
 
     public void deleteAccountById(UUID accountId) {
         var tenantId = UserContext.getUserContextData().tenantId();
+        accountDeletionPolicy.validateAccountDeletion(tenantId, accountId);
         LOGGER.info("Deleting account with ID: {} for tenant ID: {}", accountId, tenantId);
         int deletedCount = accountRepository.deleteByIdAndTenantId(accountId, tenantId);
         if (deletedCount == 0) {
