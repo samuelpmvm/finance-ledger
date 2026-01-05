@@ -102,4 +102,13 @@ public class GlobalExceptionHandler {
                         ApiErrorMessage.ACCOUNT_CAN_NOT_BE_DELETED.getError(),
                         exception.getMessage()));
     }
+
+    @ExceptionHandler(CategoryDeletionNotAllowedException.class)
+    public ResponseEntity<CategoryNotFoundError> handleCategoryDeletionNotAllowedException(CategoryDeletionNotAllowedException exception) {
+        LOGGER.error("Category deletion not allowed exception found: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.IM_USED)
+                .body(new CategoryNotFoundError(HttpStatus.IM_USED.value(),
+                        ApiErrorMessage.CATEGORY_CAN_NOT_BE_DELETED.getError(),
+                        exception.getMessage()));
+    }
 }

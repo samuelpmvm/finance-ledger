@@ -1,8 +1,10 @@
 package com.fintech.finance.ledger.service;
 
 import com.fintech.finance.ledger.TenantTestExtension;
+import com.fintech.finance.ledger.common.exception.CategoryDeletionNotAllowedException;
 import com.fintech.finance.ledger.common.exception.CategoryNotFoundException;
 import com.fintech.finance.ledger.common.tenant.UserContext;
+import com.fintech.finance.ledger.common.validator.CategoryDeletionPolicy;
 import com.fintech.finance.ledger.entity.Category;
 import com.fintech.finance.ledger.mapper.CategoryMapper;
 import com.fintech.finance.ledger.repository.CategoryRepository;
@@ -24,6 +26,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith({MockitoExtension.class, TenantTestExtension.class})
 @Tag("unit")
@@ -37,11 +40,14 @@ class CategoryServiceTest {
     @Mock
     private CategoryRepository categoryRepository;
 
+    @Mock
+    private CategoryDeletionPolicy categoryDeletionPolicy;
+
     private final CategoryMapper categoryMapper = Mappers.getMapper(CategoryMapper.class);
 
     @BeforeEach
     void setup() {
-        categoryService = new CategoryService(categoryRepository, categoryMapper);
+        categoryService = new CategoryService(categoryRepository, categoryMapper, categoryDeletionPolicy);
     }
 
     @Test
@@ -102,8 +108,49 @@ class CategoryServiceTest {
 
     @Test
     void testDeleteAllCategories() {
+        Mockito.when(categoryRepository.getAllByTenantId(UserContext.getUserContextData().tenantId())).thenReturn(List.of());
         categoryService.deleteAllCategories();
         Mockito.verify(categoryRepository, Mockito.times(1)).deleteAllByTenantId(UserContext.getUserContextData().tenantId());
+    }
+
+    @Test
+    void testDeleteCategoryByIdFailsWhenCategoryHasChildCategories() {
+        var categoryId = UUID.randomUUID();
+        var tenantId = UserContext.getUserContextData().tenantId();
+        doThrow(new CategoryDeletionNotAllowedException("Category with ID: " + categoryId + " cannot be deleted as it has associated child categories."))
+                .when(categoryDeletionPolicy).validateCategoryDeletion(tenantId, categoryId);
+
+        var exception = assertThrows(CategoryDeletionNotAllowedException.class,
+                () -> categoryService.deleteCategoryById(categoryId));
+
+        assertTrue(exception.getMessage().contains("cannot be deleted as it has associated child categories"));
+        Mockito.verify(categoryDeletionPolicy, Mockito.times(1)).validateCategoryDeletion(tenantId, categoryId);
+        Mockito.verify(categoryRepository, Mockito.never()).deleteByIdAndTenantId(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    void testDeleteAllCategoriesFailsWhenAnyCategoryHasChildCategories() {
+        var tenantId = UserContext.getUserContextData().tenantId();
+        var category1 = getCategory();
+        var category1Id = UUID.randomUUID();
+        category1.setId(category1Id);
+        var category2 = getCategory();
+        var category2Id = UUID.randomUUID();
+        category2.setId(category2Id);
+
+        Mockito.when(categoryRepository.getAllByTenantId(tenantId)).thenReturn(List.of(category1, category2));
+
+        Mockito.doNothing().when(categoryDeletionPolicy).validateCategoryDeletion(tenantId, category1Id);
+        doThrow(new CategoryDeletionNotAllowedException("Category with ID: " + category2Id + " cannot be deleted as it has associated child categories."))
+                .when(categoryDeletionPolicy).validateCategoryDeletion(tenantId, category2Id);
+
+        var exception = assertThrows(CategoryDeletionNotAllowedException.class,
+                () -> categoryService.deleteAllCategories());
+
+        assertTrue(exception.getMessage().contains("cannot be deleted as it has associated child categories"));
+        Mockito.verify(categoryDeletionPolicy, Mockito.times(1)).validateCategoryDeletion(tenantId, category1Id);
+        Mockito.verify(categoryDeletionPolicy, Mockito.times(1)).validateCategoryDeletion(tenantId, category2Id);
+        Mockito.verify(categoryRepository, Mockito.never()).deleteAllByTenantId(tenantId);
     }
 
     @Test
@@ -139,4 +186,3 @@ class CategoryServiceTest {
         return category;
     }
 }
-

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,4 +26,8 @@ public interface CategoryRepository extends TenantAwareRepository<Category, UUID
     @Modifying
     @Transactional
     int deleteByIdAndTenantId(UUID categoryId,UUID tenantId);
+
+    boolean existsByTenantIdAndParentId(UUID tenantId, UUID parentId);
+
+    List<Category> getAllByTenantId(UUID tenantId);
 }

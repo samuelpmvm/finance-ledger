@@ -205,6 +205,45 @@ class CategoryControllerTest extends BaseIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void shouldNotDeleteCategoryWithChildCategories() throws Exception {
+        UUID parentCategoryId = createTestCategory(TEST_CATEGORY_1);
+        createTestCategoryWithParent(TEST_CATEGORY_2, parentCategoryId);
+
+        mockMvc.perform(delete(API_V1_CATEGORIES + "/{categoryId}", parentCategoryId)
+                        .with(jwt().jwt(jwt -> {
+                            jwt.subject(AUTH_PROVIDER_ID);
+                            jwt.claim("email", TEST_EMAIL);
+                        })))
+                .andExpect(status().isImUsed())
+                .andExpect(jsonPath("$.message").value("Category with ID: " + parentCategoryId + " cannot be deleted as it has associated child categories."));
+    }
+
+    @Test
+    void shouldNotDeleteAllCategoriesWhenAnyHasChildCategories() throws Exception {
+        UUID parentCategoryId = createTestCategory(TEST_CATEGORY_1);
+        createTestCategoryWithParent(TEST_CATEGORY_2, parentCategoryId);
+
+        mockMvc.perform(delete(API_V1_CATEGORIES)
+                        .with(jwt().jwt(jwt -> {
+                            jwt.subject(AUTH_PROVIDER_ID);
+                            jwt.claim("email", TEST_EMAIL);
+                        })))
+                .andExpect(status().isImUsed())
+                .andExpect(jsonPath("$.message").value("Category with ID: " + parentCategoryId + " cannot be deleted as it has associated child categories."));
+
+        mockMvc.perform(get(API_V1_CATEGORIES)
+                        .with(jwt().jwt(jwt -> {
+                            jwt.subject(AUTH_PROVIDER_ID);
+                            jwt.claim("email", TEST_EMAIL);
+                        }))
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.totalElements").value(2));
+    }
+
     private static CategoryDto createCategoryDto(String name) {
         CategoryDto categoryDto = new CategoryDto();
         categoryDto.setName(name);
@@ -227,6 +266,25 @@ class CategoryControllerTest extends BaseIntegrationTest {
                 .getContentAsString();
 
         return objectMapper.readValue(response, CategoryDto.class).getId();
+    }
+
+    private void createTestCategoryWithParent(String name, UUID parentId) throws Exception {
+        CategoryDto categoryDto = createCategoryDto(name);
+        categoryDto.setParentId(parentId);
+
+        String response = mockMvc.perform(post(API_V1_CATEGORIES)
+                        .with(jwt().jwt(jwt -> {
+                            jwt.subject(AUTH_PROVIDER_ID);
+                            jwt.claim("email", TEST_EMAIL);
+                        }))
+                        .contentType(CATEGORY_REQUEST_JSON)
+                        .content(objectMapper.writeValueAsString(categoryDto)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        objectMapper.readValue(response, CategoryDto.class);
     }
 }
 

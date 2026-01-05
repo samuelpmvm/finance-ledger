@@ -3,6 +3,8 @@ package com.fintech.finance.ledger.service;
 import com.fintech.finance.ledger.common.exception.ApiErrorMessage;
 import com.fintech.finance.ledger.common.exception.CategoryNotFoundException;
 import com.fintech.finance.ledger.common.tenant.UserContext;
+import com.fintech.finance.ledger.common.validator.CategoryDeletionPolicy;
+import com.fintech.finance.ledger.entity.Category;
 import com.fintech.finance.ledger.mapper.CategoryMapper;
 import com.fintech.finance.ledger.mapper.PageDtoMapper;
 import com.fintech.finance.ledger.repository.CategoryRepository;
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final CategoryDeletionPolicy categoryDeletionPolicy;
     private static final Logger LOGGER = LoggerFactory.getLogger(CategoryService.class);
 
     public CategoryPage getAllCategories(Pageable pageable) {
@@ -68,12 +71,17 @@ public class CategoryService {
 
     public void deleteAllCategories() {
         var tenantId = UserContext.getUserContextData().tenantId();
+        var categories = categoryRepository.getAllByTenantId(tenantId);
+        for (Category category : categories) {
+            categoryDeletionPolicy.validateCategoryDeletion(tenantId, category.getId());
+        }
         LOGGER.info("Deleting all categories for tenant ID: {}", tenantId);
         categoryRepository.deleteAllByTenantId(tenantId);
     }
 
     public void deleteCategoryById(UUID categoryId) {
         var tenantId = UserContext.getUserContextData().tenantId();
+        categoryDeletionPolicy.validateCategoryDeletion(tenantId, categoryId);
         LOGGER.info("Deleting category with ID: {} for tenant ID: {}", categoryId, tenantId);
         int deletedCount = categoryRepository.deleteByIdAndTenantId(categoryId, tenantId);
         if (deletedCount == 0) {
