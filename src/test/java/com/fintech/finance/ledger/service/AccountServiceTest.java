@@ -195,6 +195,54 @@ class AccountServiceTest {
         assertThrows( AccountNotFoundException.class, () -> accountService.updateAccount(updatedAccountDto));
     }
 
+    @Test
+    void testArchiveAccountByIdSuccess() {
+        var accountId = UUID.randomUUID();
+        var existingAccount = getAccount();
+        existingAccount.setId(accountId);
+        existingAccount.setArchived(false);
+
+        Mockito.when(accountRepository.findByIdAndTenantId(accountId, UserContext.getUserContextData().tenantId()))
+                .thenReturn(Optional.of(existingAccount));
+        Mockito.when(accountRepository.save(existingAccount)).thenReturn(existingAccount);
+
+        accountService.archiveUnarchiveAccountById(accountId, true);
+
+        ArgumentCaptor<Account> accountEntityArgumentCaptor = ArgumentCaptor.forClass(Account.class);
+        Mockito.verify(accountRepository, Mockito.times(1)).save(accountEntityArgumentCaptor.capture());
+        var savedAccount = accountEntityArgumentCaptor.getValue();
+        assertTrue(savedAccount.isArchived());
+    }
+
+    @Test
+    void testUnarchiveAccountByIdSuccess() {
+        var accountId = UUID.randomUUID();
+        var existingAccount = getAccount();
+        existingAccount.setId(accountId);
+        existingAccount.setArchived(true);
+
+        Mockito.when(accountRepository.findByIdAndTenantId(accountId, UserContext.getUserContextData().tenantId()))
+                .thenReturn(Optional.of(existingAccount));
+        Mockito.when(accountRepository.save(existingAccount)).thenReturn(existingAccount);
+
+        accountService.archiveUnarchiveAccountById(accountId, false);
+
+        ArgumentCaptor<Account> accountEntityArgumentCaptor = ArgumentCaptor.forClass(Account.class);
+        Mockito.verify(accountRepository, Mockito.times(1)).save(accountEntityArgumentCaptor.capture());
+        var savedAccount = accountEntityArgumentCaptor.getValue();
+        assertFalse(savedAccount.isArchived());
+    }
+
+    @Test
+    void testArchiveAccountByIdFailsWhenAccountNotFound() {
+        var accountId = UUID.randomUUID();
+        Mockito.when(accountRepository.findByIdAndTenantId(accountId, UserContext.getUserContextData().tenantId()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(AccountNotFoundException.class, () -> accountService.archiveUnarchiveAccountById(accountId, true));
+        Mockito.verify(accountRepository, Mockito.never()).save(Mockito.any());
+    }
+
     private static Account getAccount() {
         var account = new Account();
         account.setName(ACCOUNT_NAME);

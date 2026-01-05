@@ -259,6 +259,60 @@ class AccountControllerTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.totalElements").value(2));
     }
 
+    @Test
+    void shouldArchiveAccountById() throws Exception {
+        UUID accountId = createTestAccount(TEST_ACCOUNT_1, BALANCE_1);
+
+        mockMvc.perform(patch(API_V1_ACCOUNTS + "/{accountId}", accountId)
+                        .with(jwt().jwt(jwt -> {
+                            jwt.subject(AUTH_PROVIDER_ID);
+                            jwt.claim("email", TEST_EMAIL);
+                        }))
+                        .param("archive", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(accountId.toString()))
+                .andExpect(jsonPath("$.name").value(TEST_ACCOUNT_1))
+                .andExpect(jsonPath("$.archived").value(true));
+    }
+
+    @Test
+    void shouldUnarchiveAccountById() throws Exception {
+        UUID accountId = createTestAccount(TEST_ACCOUNT_1, BALANCE_1);
+
+        mockMvc.perform(patch(API_V1_ACCOUNTS + "/{accountId}", accountId)
+                        .with(jwt().jwt(jwt -> {
+                            jwt.subject(AUTH_PROVIDER_ID);
+                            jwt.claim("email", TEST_EMAIL);
+                        }))
+                        .param("archive", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.archived").value(true));
+
+        mockMvc.perform(patch(API_V1_ACCOUNTS + "/{accountId}", accountId)
+                        .with(jwt().jwt(jwt -> {
+                            jwt.subject(AUTH_PROVIDER_ID);
+                            jwt.claim("email", TEST_EMAIL);
+                        }))
+                        .param("archive", "false"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(accountId.toString()))
+                .andExpect(jsonPath("$.name").value(TEST_ACCOUNT_1))
+                .andExpect(jsonPath("$.archived").value(false));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenArchivingNonExistentAccount() throws Exception {
+        UUID nonExistentId = UUID.randomUUID();
+
+        mockMvc.perform(patch(API_V1_ACCOUNTS + "/{accountId}", nonExistentId)
+                        .with(jwt().jwt(jwt -> {
+                            jwt.subject(AUTH_PROVIDER_ID);
+                            jwt.claim("email", TEST_EMAIL);
+                        }))
+                        .param("archive", "true"))
+                .andExpect(status().isNotFound());
+    }
+
     private static AccountDto createAccountDto(String name, double balance) {
         AccountDto accountDto = new AccountDto();
         accountDto.setName(name);

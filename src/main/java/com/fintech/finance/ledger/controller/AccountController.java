@@ -54,7 +54,13 @@ public class AccountController implements AccountControllerApi {
 
     @Override
     public ResponseEntity<AccountDto> updateAccount(AccountDto accountDto) {
-        var updatedAccount = accountService.createAccount(accountDto);
+        var updatedAccount = accountService.updateAccount(accountDto);
+        return ResponseEntity.ok(updatedAccount);
+    }
+
+    @Override
+    public ResponseEntity<AccountDto> archiveUnarchiveAccountById(UUID accountId, Boolean archive) {
+        var updatedAccount = accountService.archiveUnarchiveAccountById(accountId, archive);
         return ResponseEntity.ok(updatedAccount);
     }
 }

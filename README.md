@@ -48,7 +48,8 @@ The application follows a **modular monolith** approach with **multi-tenant** su
 src/main/java/com/fintech/finance/ledger/
 ├── common/            # Shared utilities
 │   ├── exception/     # Global exception handling
-│   └── tenant/        # Multi-tenant context management
+│   ├── tenant/        # Multi-tenant context management
+│   └── validator/     # Business rule validators (deletion policies)
 ├── controller/        # REST API controllers
 ├── entity/            # JPA entities (Account, Budget, Category, Transaction, User, Tenant)
 ├── mapper/            # MapStruct mappers
@@ -78,6 +79,7 @@ src/main/java/com/fintech/finance/ledger/
 | `POST` | `/finance-ledger/api/v1/accounts` | Create a new account |
 | `GET` | `/finance-ledger/api/v1/accounts/{id}` | Get account by ID |
 | `PUT` | `/finance-ledger/api/v1/accounts` | Update an account |
+| `PATCH` | `/finance-ledger/api/v1/accounts/{id}?archive={true\|false}` | Archive or unarchive an account |
 | `DELETE` | `/finance-ledger/api/v1/accounts/{id}` | Delete an account |
 | `DELETE` | `/finance-ledger/api/v1/accounts` | Delete all accounts |
 
@@ -116,6 +118,45 @@ src/main/java/com/fintech/finance/ledger/
 - `investment` - Investment accounts
 - `savings` - Savings accounts
 - `other` - Other account types
+
+---
+
+## 📋 Business Rules
+
+### Account Archive Feature
+
+Accounts can be archived instead of deleted to preserve historical data:
+
+- **Archive an account**: `PATCH /accounts/{id}?archive=true`
+- **Unarchive an account**: `PATCH /accounts/{id}?archive=false`
+- Archived accounts are still accessible but can be filtered out from active account lists
+- This provides a soft-delete alternative that preserves transaction history
+
+### Deletion Policies
+
+The application enforces the following deletion policies to maintain data integrity:
+
+#### Account Deletion Policy
+- **Accounts with associated transactions cannot be deleted**
+- When attempting to delete an account that has transactions, the API returns HTTP status `226 IM_USED` with an error message
+- This applies to both single account deletion (`DELETE /accounts/{id}`) and bulk deletion (`DELETE /accounts`)
+- To delete an account, first delete or reassign all associated transactions
+
+#### Category Deletion Policy
+- **Categories with child categories cannot be deleted**
+- When attempting to delete a category that has child categories, the API returns HTTP status `226 IM_USED` with an error message
+- This applies to both single category deletion (`DELETE /categories/{id}`) and bulk deletion (`DELETE /categories`)
+- To delete a parent category, first delete or reassign all child categories
+
+### Error Responses
+
+| HTTP Status | Error Type | Description |
+|-------------|------------|-------------|
+| `404 Not Found` | AccountNotFoundException | Account not found with the given ID |
+| `404 Not Found` | CategoryNotFoundException | Category not found with the given ID |
+| `404 Not Found` | TransactionNotFoundException | Transaction not found with the given ID |
+| `226 IM Used` | AccountDeletionNotAllowedException | Account cannot be deleted due to associated transactions |
+| `226 IM Used` | CategoryDeletionNotAllowedException | Category cannot be deleted due to child categories |
 
 ---
 

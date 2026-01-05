@@ -82,4 +82,12 @@ public class AccountService {
         return accountMapper.toDto(accountRepository.save(updatedAccount));
     }
 
+    public AccountDto archiveUnarchiveAccountById(UUID accountId, Boolean archive) {
+        var tenantId = UserContext.getUserContextData().tenantId();
+        LOGGER.info("{} account with ID: {} for tenant ID: {}", Boolean.TRUE.equals(archive) ? "Archiving" : "Unarchiving", accountId, tenantId);
+        var existingAccount = accountRepository.findByIdAndTenantId(accountId, tenantId)
+                .orElseThrow(() -> new AccountNotFoundException(ApiErrorMessage.ACCOUNT_NOT_FOUND.getErrorMessage(accountId)));
+        existingAccount.setArchived(archive);
+        return accountMapper.toDto(accountRepository.save(existingAccount));
+    }
 }
